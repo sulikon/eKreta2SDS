@@ -1,0 +1,57 @@
+﻿Előfeltételek:
+
+1) Office 365 oktatási változat környezet, megfelelő mennyiségű tanári és diáklicenccel (akár a fél éves lejáró próbalicenc is jó)
+2) Az Office 365 környezet egy Global Administrator szerepkörű felhasználója, jelszava
+3) Az Office 365 környezet domain neve (pl. probavarisuli.hu)
+4) Az iskola adatai (OM azonosító, név, cím)
+5) A felhasználók kezdeti jelszava ugyanúgy kezdődik, ez a közös jelszó "prefix" is szükséges.
+6) Az eKréta rendszerből a Tanulok_tantargyai_es_pedagogusai.xlsx riport. 
+   Elérhetősége KRÉTA adminisztrátor felhasználóval: 
+   "Nyilvántartások" felső menü, benne "Tanulók"
+   A felső soron "Export" és a megjelenő listából válasszuk a "Tanulók tantárgyai és pedagógusai" elemet.
+7) Windows 10-es számítógép
+8) Powershell 5.1
+
+Telepítés:
+
+1) Futtassuk le a eKinstall.cmd -t, minden felmerülő kérdésre pozitív választ adjunk: "Y", vagy ahol lehet, ott inkább "A". Jó sokszor kell.
+   Ha elrontottuk, gond nélkül többször elindítható.
+   Ez telepíti a szükséges PowerShell modulokat a számítógépre.
+2) A Tanulok_tantargyai_es_pedagogusai.xlsx file-t másoljuk az input mappába.
+3) Notepad-del szerkesszük az eKreta2SDS.cmd -t. Adjuk meg a kért adatokat. 
+   Ügyeljünk arra, hogy ne használjunk ékezetet, ahol ez a kérés.
+   Különösen ravasz kezdőjelszót válasszunk az instrukciók szerint. Ismert szavak ne legyenek benne! Ez az egyik legnehezebb feladat...
+
+Futtatás:
+
+1) Futtassuk le az eKreta2SDS.cmd -t. Ezzel az XLS file-t konvertálásra kerül. Eredményképpen nem módosul az Office 365, 
+   hanem az Output mappában keletkeznek School Data Sync formátumú .CSV fileok.
+   Ez bekéri az Office 365 rendszergazda (Global Admin szerepkörű) felhasználó nevét és jelszavát, de csak olvas, nem módosít semmit. 
+2) Ha van olyan tanár, akinek nincs oktatási azonosítója az XLS-ben, akkor a script futása hibával megszakad. 
+   A hibaüzenetben javasolt sort másoljuk be az input\override.csv -be.
+   Sajnos minden egyes hiba után újra kell indítani a scriptet. Bocs.
+3) Az elkészült file-okat ellenőrizzük az Output mappában. Nyissuk meg őket egyenként Notepad-del és "Mentés másként..." alatt nézzük meg, 
+   hogy a filetípus "UTF8" legyen. Más nem jó, az "UTF-8 BOM" sem. Állítsuk át UTF-8-ra a kódolást és írjuk felül az eredetit, 
+   ha nem az volt a típusa a file-oknak.
+4) Finomhangoljuk a beállítást vagy akár módosítsuk a scriptet, amíg a várt eredmény előáll.
+5) Nyissuk meg a https://sds.microsoft.com oldalt, jelentkezzünk be az Office 365 rendszergazdával és hozzuk létre és 
+   futtassuk le a School Data Sync profile-t a "doc\SDS beállítása" mappa képei alapján. 
+   Ez hozza létre a felhasználókat, csoportokat és népesíti be őket.
+   Mindez akár egy órát is tarthat.
+6) Ellenőrizzük a keletkezett hibákat, hárítsuk el akár az XLSX módosításával és a script újrafuttatásával, 
+   akár pedig az Output mappa filejainak kézi módosításával. Az SDS Profile-ba töltsük fel az új .CSV-ket az Output mappából,
+   és próbálkozzunk a kívánat eredmény eléréséig.
+
+Kiosztás:
+
+Az Output könyvtárban a student.csv a diákok, a teacher.csv a tanárok felhasználóneveit és kezdő jelszavait tartalmazza.
+
+Tanári aktiválás:
+
+A https://teams.microsoft.com oldalon bejelentkezve látszanak a csoportok. Mindegyiket meg kell nyitni és aktiválni kell, hogy a diákok is lássák.
+
+Diák használatba vétel:
+
+https://teams.microsoft.com oldalon vagy okostelefonos/Windows 10-es alkalmazással.
+
+

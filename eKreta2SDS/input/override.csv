@@ -1,0 +1,10 @@
+﻿Type;SchoolID;Key;Data
+# Ezek példasorok. Használatba vételhez másolja le, vegye ki a # jelet az elejéről és írja át igényei szerint-
+#
+#TeacherName;012345;Dr Széppataki Károly Elelmérné Dr Visnyei Ilona;Visnyei Ilona
+#TeacherName2ID;012345;Haász Károlyné;2019201001
+#TeacherName2ID;012345;Imre Ferenc;2019201002
+#TeacherName2UserName;012345;Pákozdi Anna;pakozdia@probavarsuli.hu
+#TeacherID2UserName;012345;2019101004;KissL@turr.hu
+#StudentID2FirstName;012345;7555867854;"Béla"
+#StudentID2LastName;012345;7555867854;"Kovács"
