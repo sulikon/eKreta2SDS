@@ -1,4 +1,11 @@
-﻿Előfeltételek:
+Az Office 365 oktatási változat segítségével digitális oktatási alapplatform hozható létre egy iskolában, 
+amely távoktatásban is jól hasznosítható.
+Az eKreta2SDS segítségével egy üres iskolai Office 365 környezetben létre lehet hozni az összes tanárt, diákot, tanulócsoportokat 
+az intézmény eKréta rendszerének adatai alapján.
+A tanulócsoportok tulajdonosai az ott tanító tanárok, tagjai a diákok lesznek.
+Egy intézményt lefedő teljes kialakítás akár egy óra alatt is kivitelezhető - akkor is, ha az intézménynek nincs is még Office 365 hozzáférése.
+
+Előfeltételek:
 
 1) Office 365 oktatási változat környezet, megfelelő mennyiségű tanári és diáklicenccel (akár a fél éves lejáró próbalicenc is jó)
 2) Az Office 365 környezet egy Global Administrator szerepkörű felhasználója, jelszava
