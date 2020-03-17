@@ -14,8 +14,9 @@ rem Az Office 365 környezet domain neve
 set param4=-UPNSuffix 'probavarsuli.hu'
 set param5=-tenantid probavarsuli.hu
 
-rem Kezdõ jelszó. Legyen legalább 8 betû, kisbetût, nagybetût, számot és egy jelet is tartalmazzon.
-set param7=-PasswordPrefix 'IEC19nek38.' 
+rem Felhasználók kezdõ jelszavának eleje Legyen legalább 4 betû, kisbetût, nagybetût és egy jelet is tartalmazzon. 
+rem A kezdõ jelszóba az itt megadott prefix után a felhasználó saját oktatási azonosítójának utolsó 4 számjegye kerül.
+set param7=-PasswordPrefix 'KL.Bp' 
 
 rem --- Ez alatt a vonal alatt nem kell módosítani a 2019/20 tanévben ---
 
