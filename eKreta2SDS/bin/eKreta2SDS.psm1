@@ -177,14 +177,16 @@ function InitAzureAD {
         $Global:sid = 10000
         #retrieve all section groups and their SID. Determine the highest used Section SID in Azure AD (for new Section SIDs)
         $global:AzureADGroups | % {
-            if ($_.MailNickName.Substring(0, 8) -eq "Section_") {
-                #Only for Section groups!
-                $SectionID = [int] $_.MailNickName.Substring(8)
-                $global:sections[$_.Displayname] = $SectionID
-                if ($Global:sid -le $SectionID) {
-                    $Global:sid = $SectionID
-                }
-            }
+          if ($_.MailNickName.Length -ge 8) {
+              if ($_.MailNickName.Substring(0, 8) -eq "Section_") {
+                  #Only for Section groups!
+                  $SectionID = [int] $_.MailNickName.Substring(8)
+                  $global:sections[$_.Displayname] = $SectionID
+                  if ($Global:sid -le $SectionID) {
+                      $Global:sid = $SectionID
+                  }
+              }
+          }
         }
         # TODO:         
         #$azureadusers|foreach-object{$global:azureadusers[$_.UserPrincipalName] = "1"} 
