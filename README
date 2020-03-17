@@ -39,7 +39,7 @@ Futtatás:
    A hibaüzenetben javasolt sort másoljuk be az input\override.csv -be.
    Sajnos minden egyes hiba után újra kell indítani a scriptet. Bocs.
 3) Az elkészült file-okat ellenőrizzük az Output mappában. Nyissuk meg őket egyenként Notepad-del és "Mentés másként..." alatt nézzük meg, 
-   hogy a filetípus "UTF8" legyen. Más nem jó, az "UTF-8 BOM" sem. Állítsuk át UTF-8-ra a kódolást és írjuk felül az eredetit, 
+   hogy a filetípus "UTF8" vagy "UTF-8 és BOM" legyen. Más nem jó. Állítsuk át UTF-8-ra a kódolást és írjuk felül az eredetit, 
    ha nem az volt a típusa a file-oknak.
 4) Finomhangoljuk a beállítást vagy akár módosítsuk a scriptet, amíg a várt eredmény előáll.
 5) Nyissuk meg a https://sds.microsoft.com oldalt, jelentkezzünk be az Office 365 rendszergazdával és hozzuk létre és 
