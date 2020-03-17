@@ -10,21 +10,22 @@
    "Nyilvántartások" felső menü, benne "Tanulók"
    A felső soron "Export" és a megjelenő listából válasszuk a "Tanulók tantárgyai és pedagógusai" elemet.
 7) Windows 10-es számítógép
-8) Powershell 5.1
+8) Powershell 5.1, ami így ellenőrizhető parancssorból: powershell $PSVersionTable.PSVersion
 
 Telepítés:
 
-1) Futtassuk le a eKinstall.cmd -t, minden felmerülő kérdésre pozitív választ adjunk: "Y", vagy ahol lehet, ott inkább "A". Jó sokszor kell.
+1) Futtassuk le a eKinstall.cmd -t, nem kell rendszergazdaként.
+   Minden felmerülő kérdésre pozitív választ adjunk: "Y", vagy ahol lehet, ott inkább "A". Jó sokszor kell.
    Ha elrontottuk, gond nélkül többször elindítható.
    Ez telepíti a szükséges PowerShell modulokat a számítógépre.
 2) A Tanulok_tantargyai_es_pedagogusai.xlsx file-t másoljuk az input mappába.
 3) Notepad-del szerkesszük az eKreta2SDS.cmd -t. Adjuk meg a kért adatokat. 
    Ügyeljünk arra, hogy ne használjunk ékezetet, ahol ez a kérés.
-   Különösen ravasz kezdőjelszót válasszunk az instrukciók szerint. Ismert szavak ne legyenek benne! Ez az egyik legnehezebb feladat...
 
 Futtatás:
 
-1) Futtassuk le az eKreta2SDS.cmd -t. Ezzel az XLS file-t konvertálásra kerül. Eredményképpen nem módosul az Office 365, 
+1) Futtassuk le az eKreta2SDS.cmd -t, nem kell rendszergazdaként. 
+   Ezzel az XLS file-t konvertálásra kerül. Eredményképpen nem módosul az Office 365, 
    hanem az Output mappában keletkeznek School Data Sync formátumú .CSV fileok.
    Ez bekéri az Office 365 rendszergazda (Global Admin szerepkörű) felhasználó nevét és jelszavát, de csak olvas, nem módosít semmit. 
 2) Ha van olyan tanár, akinek nincs oktatási azonosítója az XLS-ben, akkor a script futása hibával megszakad. 
@@ -42,9 +43,15 @@ Futtatás:
    akár pedig az Output mappa filejainak kézi módosításával. Az SDS Profile-ba töltsük fel az új .CSV-ket az Output mappából,
    és próbálkozzunk a kívánat eredmény eléréséig.
 
-Kiosztás:
+Hozzáférések kiosztása:
 
-Az Output könyvtárban a student.csv a diákok, a teacher.csv a tanárok felhasználóneveit és kezdő jelszavait tartalmazza.
+Az Output könyvtárban a teacher.csv a tanárok felhasználóneveit és kezdő jelszavait tartalmazza. 
+Mivel lehetnek tanárok, akiknek az azonosítóját mi generáltuk (oktatási azonosító nem volt nekik a Krétában), 
+így velük mindenképp tudatni kell a kezdő jelszót.
+A diákok esetében a kezdő jelszó mindenképp az eKreate2SDS.cmd -ben megadott prefix és a tanuló oktatási azonosítójának utolsó 4 számjegye.
+
+Fontos és kavarodást okozhatnak a névütközések, ezért erre külön figyelni kell.
+Ha van három Nagy Andrea, akkor az első nagy.andrea@, a második nagy.andreaXY@ és nagy.andreaPQ@ lesz, ahol XY és PQ az oktatási azonosító utolsó 2 számjegye.
 
 Tanári aktiválás:
 
@@ -53,5 +60,3 @@ A https://teams.microsoft.com oldalon bejelentkezve látszanak a csoportok. Mind
 Diák használatba vétel:
 
 https://teams.microsoft.com oldalon vagy okostelefonos/Windows 10-es alkalmazással.
-
-
