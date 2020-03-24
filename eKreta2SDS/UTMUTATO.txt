@@ -1,6 +1,7 @@
 ﻿Előfeltételek:
 
 1) Office 365 oktatási változat környezet, megfelelő mennyiségű tanári és diáklicenccel (akár a fél éves lejáró próbalicenc is jó)
+   Ha ez nincs kész, a doc\Nulláról Teamsig.pdf alapján induljunk el. Ez lépésről lépésre mindent leír, ami most kell.
 2) Az Office 365 környezet egy Global Administrator szerepkörű felhasználója, jelszava
 3) Az Office 365 környezet domain neve (pl. probavarisuli.hu)
 4) Az iskola adatai (OM azonosító, név, cím)
@@ -36,7 +37,7 @@ Futtatás:
    ha nem az volt a típusa a file-oknak.
 4) Finomhangoljuk a beállítást vagy akár módosítsuk a scriptet, amíg a várt eredmény előáll.
 5) Nyissuk meg a https://sds.microsoft.com oldalt, jelentkezzünk be az Office 365 rendszergazdával és hozzuk létre és 
-   futtassuk le a School Data Sync profile-t a "doc\SDS beállítása" mappa képei alapján. 
+   futtassuk le a School Data Sync profile-t a "doc\Nulláról Teamsig.pdf" dokumentum útmutatása alapján. 
    Ez hozza létre a felhasználókat, csoportokat és népesíti be őket.
    Mindez akár egy órát is tarthat.
 6) Ellenőrizzük a keletkezett hibákat, hárítsuk el akár az XLSX módosításával és a script újrafuttatásával, 
