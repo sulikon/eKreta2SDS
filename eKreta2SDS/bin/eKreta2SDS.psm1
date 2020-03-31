@@ -99,6 +99,7 @@ function Remove-StringDiacritic {
 #  Value: TeacherName: key: Teacher Fullname, value: Teacher Fullname
 #  Value: TeacherName2Username:  key: on Teacher Fullname, value:TeacherUserName
 #  Value: TeacherName2ID  : key: Teacher FullName, value: TeacherID
+#  Value: TeacherID2ID: key: TeacherID, value: TeacherID
 #  Value: StudentID2FirstName: key: Student ID, value: StudentFirstName
 #  Value: StudentID2LastName: key: Student ID, value: StudentLastName
 
@@ -169,6 +170,9 @@ function InitAzureAD {
                 "Student" { $SID = $userext.extension_fe2174665583431c953114ff7268b7b3_Education_SyncSource_StudentId }
                 default { $SID = "" }
             }; 
+            If ($SID -match "^201920\d+") {      # detect pre-2020.03.31 generated SIDs to warn user to put them in override
+                $global:oldgeneratedsid++
+            }
             $global:azureadusers[$_.UserPrincipalName] = $SID
         }
         Write-PSFMessage -level host "Azure AD userek betöltése befejezödött: $($global:azureadusers.count) user account letöltődött."
@@ -302,7 +306,8 @@ function Get-UniqueUsername {
         }      
     }
     else {
-        throw $inputName + ": hiányzó felhasználónév ($InputUsername) vagy oktatási azonosító ($InputSID). Gyors megoldás: vigyen fel az override.csv-be egy megfelelő sort! Példa:`nTeacherName2ID;" + $Schoolid + ";" + $inputName + ";" + (Get-Random -Minimum 1000000 -Maximum 9999999)
+        Write-PSFMessage "$($inputName): hiányzó felhasználónév ($InputUsername) vagy oktatási azonosító ($InputSID). Gyors megoldás: vigye fel az override.csv-be az alábbi sort!" -Verbose
+        throw Write-PSFMessage ("TeacherName2ID;" + $Schoolid + ";" + $inputName + ";" + (Get-Random -Minimum 1000000 -Maximum 9999999)) -Verbose
     }
     return $newusername
 }
@@ -418,21 +423,34 @@ function Generate-TeacherPassword {
 #Generate Teacher ID from TeacherID,TeacherName and  OverrideData
 function Get-TeacherID {
     param ([string] $TName0,
-        [string] $TID)
+        [string] $TID,
+        [bool] $warn)
         
-    #Gert override
+    #Get override
     $TID = Get-Override "TeacherName2ID" $Tname0 $TID
     # If username contanit [KA n, and no Override!    
     if (![string]::IsNullOrWhiteSpace($TName0)) {
-#        if (($TID.length -eq 0) -and ($TName0.substring(0, 1) -eq "[")) {              # faulty method replaced. Could generate same SIS ID for "KA 1" and "HO 1"
-#            $TID = $StudentYear + (($tname0 -replace "\].+", "") -replace ("^\" + $Tname0.Substring(0, 3) + "\s+"), "")             
-#        }
-        if (($TID.length -eq 0) -and ($TName0.substring(0, 1) -eq "[")) {
+        if (($TID.length -eq 0) -and ($TName0.substring(0, 1) -eq "[")) {              # faulty method replaced. Could generate same SIS ID for "KA 1" and "HO 1"
+            $oldTID = $StudentYear + (($tname0 -replace "\].+", "") -replace ("^\" + $Tname0.Substring(0, 3) + "\s+"), "")             
             $TID = $StudentYear + ($tname0.Substring(1, $TName0.IndexOf("]") - 1 ) -replace "\s+", "")              
+            if ($warn -and ($oldTID -ne (Get-Override "TeacherID2ID" $TID $TID))) {
+                if ($Global:oldgeneratedsid -gt 0) {
+                    Write-PSFMessage "2020.03.31-n megváltozott az oktatási azonosító nélküli tanárok azonosítógenerálása." -Verbose
+                    Write-PSFMessage "Az új generálási szabály miatt új felhasználók jöhetnek létre a már meglévők mellé." -Verbose
+                    Write-PSFMessage "Ez úgy kerülhető el, ha az input\override.csv-ben minden érintetthez felvisz egy sort." -Verbose
+                    Write-PSFMessage "Ebben az output\teacher.csv-ben található új azonosítót a régire cseréljük vissza." -Verbose
+                    Write-PSFMessage "Ezeket az új sorokat tegye az input\override.csv-be:"  -Verbose
+                    $Global:oldgeneratedsid=0            
+                }
+                Write-PSFMessage "# $TName0 régi azonosítójának megtartása:"  -Verbose
+                Write-PSFMessage "TeacherID2ID;$SchoolID;$TID;$oldTID"  -Verbose 
+            }
         }
     }
+    $TID = Get-Override "TeacherID2ID" $TID $TID
     return $TID
 }
+
 function fSId {
     $global:sid++    
     return $global:sid
@@ -523,6 +541,9 @@ Function eKreta2Convert() {
     #Helper function for unique SIDs
     $global:sid = 10000 #Global needed to works as static variable in subsequent enumerations
 
+    #Check for pre-2020.03.31 generated SID for users with no ID in source
+    $global:oldgeneratedsid=0
+
     #For School specific codes, we check the current SchoolID against these variables
     $SchoolIDB = "B"
 
@@ -589,7 +610,7 @@ Function eKreta2Convert() {
                 Write-PSFMessage -Level Debug "IN :$_"
             }
             $_.TeacherName0 = Get-OVerride "TeacherName" $_.Pedagógus $_.Pedagógus
-            $_.'SIS ID' = Get-TeacherID $_.Pedagógus $_.'SIS ID'  # Speciális SIS ID-t eredeti nem overrideolt névből kell venni!
+            $_.'SIS ID' = Get-TeacherID $_.Pedagógus $_.'SIS ID' $true # Speciális SIS ID-t eredeti nem overrideolt névből kell venni!
             $_.TeacherName0 = Convert-Teachername $_.TeacherName0 $_.'SIS ID'       
             $_.TeacherFirstName = Get-UserFirstName $_.TeacherName0
             $_.TeacherLastName = Get-UserLastName $_.TeacherName0
@@ -848,7 +869,7 @@ Function eKreta2Convert() {
                     Write-PSFMessage -level DEBUG "Tanár aktuális rekord: $_"
                 }
                 $_.'SIS ID' = Get-OverRide "TeacherName2ID"  $_.Pedagógus  $_.'SIS ID'
-                $_.'SIS ID' = Get-TeacherID $_.Pedagógus $_.'SIS ID' 
+                $_.'SIS ID' = Get-TeacherID $_.Pedagógus $_.'SIS ID' $false 
             }
 
             # unique filtering and safety check for missing SIS ID (theoritecally couldn't be missing at this point!)
