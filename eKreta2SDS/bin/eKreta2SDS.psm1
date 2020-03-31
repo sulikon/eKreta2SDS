@@ -315,8 +315,10 @@ function Convert-TeacherName {
         #can be empty input parameter!
         if ($fullname.Substring(0, 1) -eq "[") {               
             $newname = $newname -replace "^\[KA\s+[0-9]+]\s+Külsős\s+", ""
+            $newname = $newname -replace "^\[KA\s+[0-9]+]\s+", "" # For Full names containing "[KA x]" without "Külsős"
             $newname = $newname -replace "^\[HO\s+[0-9]+]\s+", ""
             $newname = $newname -replace "^\[H.O.\]\s+Külsős\s+", ""
+            $newname = $newname -replace "^\[H.O.\]\s+", "" # For Full names containing "[H.O. x]" without "Külsős"
             $newname = $newname -replace "^\[\.+\]\s+", ""
         }
     }
@@ -339,14 +341,14 @@ function Get-Username {
     elseif ($Naming -eq $Namingnodots) {
         #remove accents and any non word characters,  "-"  , but include space
         $newusername = ((Remove-StringDiacritic($fullname)) -replace '[^a-zA-Z_0-9\-]', '')
-        $newusername = $newusername  -replace '\.\.+', '.' -replace '\.+$', ""
+        $newusername = $newusername  -replace '\.\.+', '.' -replace '\.+$', '' -replace '^\.+', ''
     }
     elseif ($Naming -eq $Namingwithdots) {
         #  Full name with "." as separator
         #remove accents and any non word characters,  - space
         $parts = $((Remove-StringDiacritic($fullname)) -replace '[^a-zA-Z_0-9\-^\s]', '').Split(" ")
         $newusername = ($parts -join ".")     
-        $newusername = $newusername  -replace '\.\.+', '.' -replace '\.+$', ""
+        $newusername = $newusername  -replace '\.\.+', '.' -replace '\.+$', '' -replace '^\.+', ''
     }
     else {
         #Default User name generation!
@@ -358,7 +360,7 @@ function Get-Username {
         $firstpart = $parts[0].substring(0, [math]::min($parts[0].length, 10))
 
         $newusername = $firstpart + (($parts[(1..($parts.count - 1))] | % { $_.Substring(0, 1) }) -join "")       ### potenciális substring hiba, túl rövid string esetén
-        $newusername = $newusername  -replace '\.\.+', '.' -replace '\.+$', ""
+        $newusername = $newusername  -replace '\.\.+', '.' -replace '\.+$', '' -replace '^\.+', ''
     }
     
     if (!($newusername -match "@")) {
@@ -422,8 +424,11 @@ function Get-TeacherID {
     $TID = Get-Override "TeacherName2ID" $Tname0 $TID
     # If username contanit [KA n, and no Override!    
     if (![string]::IsNullOrWhiteSpace($TName0)) {
+#        if (($TID.length -eq 0) -and ($TName0.substring(0, 1) -eq "[")) {              # faulty method replaced. Could generate same SIS ID for "KA 1" and "HO 1"
+#            $TID = $StudentYear + (($tname0 -replace "\].+", "") -replace ("^\" + $Tname0.Substring(0, 3) + "\s+"), "")             
+#        }
         if (($TID.length -eq 0) -and ($TName0.substring(0, 1) -eq "[")) {
-            $TID = $StudentYear + (($tname0 -replace "\].+", "") -replace ("^\" + $Tname0.Substring(0, 3) + "\s+"), "")             
+            $TID = $StudentYear + ($tname0.Substring(1, $TName0.IndexOf("]") - 1 ) -replace "\s+", "")              
         }
     }
     return $TID
@@ -466,7 +471,7 @@ Function eKreta2Convert() {
         [Parameter()][string]$PasswordPrefix = "PwdPrefix"
     )
     #  Versioning 
-    $version = "20200315.1"
+    $version = "20200331.1"
 
     # Check prereq
     try {
