@@ -59,7 +59,7 @@ catch {
 }
 
 #  Versioning 
-$version = "20200315.1"
+$version = "20200331.1"
 
 #Determine $PSR Script Root path
 if ($null -ne $psISE) {
@@ -163,7 +163,7 @@ function InitADUsers {
                 $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP -Credential $AzureCredential
             }
             else {
-                Write-PSFMessage -level host "Azure AD kapcsolat. V√°rakoz√°s a bejelentkez√©sre. Login ablak megjelenhet a h√°tt√©rben is!"
+                Write-PSFMessage -level host "Azure AD kapcsolat. V·rakoz·s a bejelentkezÈsre. A login ablak megjelenhet a h·ttÈrben is!"
                 $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP
             }
         }
@@ -306,7 +306,7 @@ try {
    
 }
 Catch {
-    write-PSFMessage -level host "K√©rem adjon meg az √©rv√©nyes hiteles√≠t≈ë adatokat a Azure AD tenanthoz!" 
+    write-PSFMessage -level host "KÈrem, adja meg az ÈrvÈnyes hitelesÌtı adatokat az Azure AD tenanthoz!" 
     return;
 }
 #$username = $cred.UserName
@@ -377,7 +377,7 @@ try {
             }
         }
         if ($waitusers -gt 0) {
-            write-host "V√°rakoz√°s  $waitusers felhaszn√°l√≥ l√©trehoz√°s√°ra √∂sszesen $totalusers felhaszn√°l√≥b√≥l.   Pr√≥b√°loz√°sok sz√°ma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenyt≈±le√ºt√©sre meg√°ll."
+            write-host "V·rakoz·s  $waitusers felhaszn·lÛ lÈtrehoz·s·ra ˆsszesen $totalusers felhaszn·lÛbÛl.   PrÛb·lkoz·sok sz·ma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenyt˚le¸tÈsre meg·ll."
             Start-Sleep -Seconds $waittime
         }
         # waiting until : key pressed or reach max wait time or  no more missing user
