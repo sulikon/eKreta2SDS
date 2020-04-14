@@ -1,4 +1,4 @@
-# Copyright 2020 EURO ONE Számítástechnikai Zártkörûen Mûködõ Részvénytársaság
+# Copyright 2020 EURO ONE Szï¿½mï¿½tï¿½stechnikai Zï¿½rtkï¿½rï¿½en Mï¿½kï¿½dï¿½ Rï¿½szvï¿½nytï¿½rsasï¿½g
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, 
 # including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -78,7 +78,15 @@ $LogDate = "$($(get-date).Year)" + $(get-date).month.ToString("00") + $(get-date
 Set-PSFLoggingProvider -Name 'LogFile' -FilePath "$LogPath\eKretaLaunch-$LogDate.Log" -Enabled $true
 Write-PSFMessage -level Host -Message "eKretaLaunch Script started. Version:$Version. Logpath: $LogPath"  
 
- 
+if ($DomainName) 
+{
+    Write-PSFMessage -level Host -Message "Running mode: Local AD + Azure Active Directory"
+}
+else
+{
+    Write-PSFMessage -level Host -Message "Running mode: Only Azure Active Directory"
+}
+
 ###########################################
 # Export-AESKey
 ###########################################
@@ -163,7 +171,7 @@ function InitADUsers {
                 $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP -Credential $AzureCredential
             }
             else {
-                Write-PSFMessage -level host "Azure AD kapcsolat. Várakozás a bejelentkezésre. A login ablak megjelenhet a háttérben is!"
+                Write-PSFMessage -level host "Azure AD kapcsolat. Vï¿½rakozï¿½s a bejelentkezï¿½sre. A login ablak megjelenhet a hï¿½ttï¿½rben is!"
                 $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP
             }
         }
@@ -306,7 +314,7 @@ try {
    
 }
 Catch {
-    write-PSFMessage -level host "Kérem, adja meg az érvényes hitelesítõ adatokat az Azure AD tenanthoz!" 
+    write-PSFMessage -level host "Kï¿½rem, adja meg az ï¿½rvï¿½nyes hitelesï¿½tï¿½ adatokat az Azure AD tenanthoz!" 
     return;
 }
 #$username = $cred.UserName
@@ -377,7 +385,7 @@ try {
             }
         }
         if ($waitusers -gt 0) {
-            write-host "Várakozás  $waitusers felhasználó létrehozására összesen $totalusers felhasználóból.   Próbálkozások száma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenytûleütésre megáll."
+            write-host "Vï¿½rakozï¿½s  $waitusers felhasznï¿½lï¿½ lï¿½trehozï¿½sï¿½ra ï¿½sszesen $totalusers felhasznï¿½lï¿½bï¿½l.   Prï¿½bï¿½lkozï¿½sok szï¿½ma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenytï¿½leï¿½tï¿½sre megï¿½ll."
             Start-Sleep -Seconds $waittime
         }
         # waiting until : key pressed or reach max wait time or  no more missing user
