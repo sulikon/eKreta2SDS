@@ -78,7 +78,15 @@ $LogDate = "$($(get-date).Year)" + $(get-date).month.ToString("00") + $(get-date
 Set-PSFLoggingProvider -Name 'LogFile' -FilePath "$LogPath\eKretaLaunch-$LogDate.Log" -Enabled $true
 Write-PSFMessage -level Host -Message "eKretaLaunch Script started. Version:$Version. Logpath: $LogPath"  
 
- 
+if ($DomainName) 
+{
+    Write-PSFMessage -level Host -Message "Running mode: Local AD + Azure Active Directory"
+}
+else
+{
+    Write-PSFMessage -level Host -Message "Running mode: Only Azure Active Directory"
+}
+
 ###########################################
 # Export-AESKey
 ###########################################
