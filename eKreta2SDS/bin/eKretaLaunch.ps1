@@ -314,7 +314,7 @@ try {
    
 }
 Catch {
-    write-PSFMessage -level host "Kérem, adja meg az érvényes hitelesítõ adatokat az Azure AD tenanthoz!" 
+    write-PSFMessage -level host "Kérem, adja meg az érvényes hitelesítő adatokat az Azure AD tenanthoz!" 
     return;
 }
 #$username = $cred.UserName
@@ -385,7 +385,7 @@ try {
             }
         }
         if ($waitusers -gt 0) {
-            write-host "Várakozás  $waitusers felhasználó létrehozására összesen $totalusers felhasználóból.   Próbálkozások száma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenytûleütésre megáll."
+            write-host "Várakozás  $waitusers felhasználó létrehozására összesen $totalusers felhasználóból.   Próbálkozások száma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenytűleütésre megáll."
             Start-Sleep -Seconds $waittime
         }
         # waiting until : key pressed or reach max wait time or  no more missing user
