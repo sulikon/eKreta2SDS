@@ -1,4 +1,4 @@
-# Copyright 2020 EURO ONE Sz�m�t�stechnikai Z�rtk�r�en M�k�d� R�szv�nyt�rsas�g
+# Copyright 2020 EURO ONE Számítástechnikai Zártkörûen Mûködõ Részvénytársaság
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, 
 # including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -7,7 +7,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
 # IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+#
 
 
 [CmdletBinding()]
@@ -171,7 +171,7 @@ function InitADUsers {
                 $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP -Credential $AzureCredential
             }
             else {
-                Write-PSFMessage -level host "Azure AD kapcsolat. V�rakoz�s a bejelentkez�sre. A login ablak megjelenhet a h�tt�rben is!"
+                Write-PSFMessage -level host "Azure AD kapcsolat. Várakozás a bejelentkezésre. A login ablak megjelenhet a háttérben is!"
                 $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP
             }
         }
@@ -314,7 +314,7 @@ try {
    
 }
 Catch {
-    write-PSFMessage -level host "K�rem, adja meg az �rv�nyes hiteles�t� adatokat az Azure AD tenanthoz!" 
+    write-PSFMessage -level host "Kérem, adja meg az érvényes hitelesítõ adatokat az Azure AD tenanthoz!" 
     return;
 }
 #$username = $cred.UserName
@@ -385,7 +385,7 @@ try {
             }
         }
         if ($waitusers -gt 0) {
-            write-host "V�rakoz�s  $waitusers felhaszn�l� l�trehoz�s�ra �sszesen $totalusers felhaszn�l�b�l.   Pr�b�lkoz�sok sz�ma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenyt�le�t�sre meg�ll."
+            write-host "Várakozás  $waitusers felhasználó létrehozására összesen $totalusers felhasználóból.   Próbálkozások száma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenytûleütésre megáll."
             Start-Sleep -Seconds $waittime
         }
         # waiting until : key pressed or reach max wait time or  no more missing user
