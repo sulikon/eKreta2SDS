@@ -1,4 +1,4 @@
-# Copyright 2020 EURO ONE Számítástechnikai Zártkörûen Mûködõ Részvénytársaság
+# Copyright 2020 EURO ONE Számítástechnikai Zártkörűen Működő Részvénytársaság
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, 
 # including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -314,7 +314,7 @@ try {
    
 }
 Catch {
-    write-PSFMessage -level host "Kérem, adja meg az érvényes hitelesítõ adatokat az Azure AD tenanthoz!" 
+    write-PSFMessage -level host "Kérem, adja meg az érvényes hitelesítő adatokat az Azure AD tenanthoz!" 
     return;
 }
 #$username = $cred.UserName
@@ -385,7 +385,7 @@ try {
             }
         }
         if ($waitusers -gt 0) {
-            write-host "Várakozás  $waitusers felhasználó létrehozására összesen $totalusers felhasználóból.   Próbálkozások száma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenytûleütésre megáll."
+            write-host "Várakozás  $waitusers felhasználó létrehozására összesen $totalusers felhasználóból.   Próbálkozások száma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenytűleütésre megáll."
             Start-Sleep -Seconds $waittime
         }
         # waiting until : key pressed or reach max wait time or  no more missing user
