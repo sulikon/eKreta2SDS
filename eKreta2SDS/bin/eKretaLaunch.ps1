@@ -1,4 +1,4 @@
-# Copyright 2020 EURO ONE Sz·mÌt·stechnikai Z·rtkˆr˚en M˚kˆdı RÈszvÈnyt·rsas·g
+# Copyright 2020 EURO ONE Sz√°m√≠t√°stechnikai Z√°rtk√∂r√ªen M√ªk√∂d√µ R√©szv√©nyt√°rsas√°g
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, 
 # including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -7,7 +7,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
 # IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+#
 
 
 [CmdletBinding()]
@@ -163,7 +163,7 @@ function InitADUsers {
                 $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP -Credential $AzureCredential
             }
             else {
-                Write-PSFMessage -level host "Azure AD kapcsolat. V·rakoz·s a bejelentkezÈsre. A login ablak megjelenhet a h·ttÈrben is!"
+                Write-PSFMessage -level host "Azure AD kapcsolat. V√°rakoz√°s a bejelentkez√©sre. A login ablak megjelenhet a h√°tt√©rben is!"
                 $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP
             }
         }
@@ -306,7 +306,7 @@ try {
    
 }
 Catch {
-    write-PSFMessage -level host "KÈrem, adja meg az ÈrvÈnyes hitelesÌtı adatokat az Azure AD tenanthoz!" 
+    write-PSFMessage -level host "K√©rem, adja meg az √©rv√©nyes hiteles√≠t√µ adatokat az Azure AD tenanthoz!" 
     return;
 }
 #$username = $cred.UserName
@@ -377,7 +377,7 @@ try {
             }
         }
         if ($waitusers -gt 0) {
-            write-host "V·rakoz·s  $waitusers felhaszn·lÛ lÈtrehoz·s·ra ˆsszesen $totalusers felhaszn·lÛbÛl.   PrÛb·lkoz·sok sz·ma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenyt˚le¸tÈsre meg·ll."
+            write-host "V√°rakoz√°s  $waitusers felhaszn√°l√≥ l√©trehoz√°s√°ra √∂sszesen $totalusers felhaszn√°l√≥b√≥l.   Pr√≥b√°lkoz√°sok sz√°ma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenyt√ªle√ºt√©sre meg√°ll."
             Start-Sleep -Seconds $waittime
         }
         # waiting until : key pressed or reach max wait time or  no more missing user
