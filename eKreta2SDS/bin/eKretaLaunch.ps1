@@ -35,8 +35,9 @@ Param (
     [Parameter()][string]$OUNameStudents = "", # sample  "OU=StudentOU,DC=lego,DC=local"
     [Parameter()][string]$NonTrustedADDomainDC, # If there any DC, then we auhenticate against this DC
     [switch]$SkipeKretaConvert = $false , #don't process the convert parts
-    [switch]$newCred = $false # Force request New Credential
-)
+    [switch]$newCred = $false, # Force request New Credential
+    [Parameter()][switch]$FlipFirstnameLastname =  $false # reverse display name if $true
+    )
 
 if ($loglevel -match "TRANSCRIPT") {
     Start-transcript "$LogPath\eKreta2SDS-Transcript-$LogDate.Log"
@@ -294,7 +295,7 @@ function CheckAzureADUser {
 }
 
 function CallConvert {
-    return  eKreta2Convert "$SchoolID" "$SchoolName" "$SchoolAddress" "$Input_tanulok" -UPNSuffix "$UPNSuffix" -tenantID "$tenantID" -PasswordPrefix $PasswordPrefix -AzureCredential $AzureCredential -DomainName $DomainName -StudentYear $StudentYear -outputPath $outputpath -LogPath $logpath
+    return  eKreta2Convert "$SchoolID" "$SchoolName" "$SchoolAddress" "$Input_tanulok" -UPNSuffix "$UPNSuffix" -tenantID "$tenantID" -PasswordPrefix $PasswordPrefix -AzureCredential $AzureCredential -DomainName $DomainName -StudentYear $StudentYear -outputPath $outputpath -LogPath $logpath -FlipFirstnameLastname:$FlipFirstnameLastname
     #reset the  LOG destination to the launcher!
     Set-PSFLoggingProvider -Name 'LogFile' -FilePath "$LogPath\eKretaLaunch-$LogDate.Log" -Enabled $true
 }

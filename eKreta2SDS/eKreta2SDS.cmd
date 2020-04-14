@@ -1,31 +1,36 @@
 @echo off
-rem --- Kérem, módosítsa a megadott példaadatokat az iskola adataira! ---
+rem --- KÃ©rem, mÃ³dosÃ­tsa a megadott pÃ©ldaadatokat az iskola adataira! ---
 
-rem Az iskola oktatási azonosítója:
+rem Az iskola oktatÃ¡si azonosÃ­tÃ³ja:
 set param1=-schoolid '012345' 
 
-rem Az iskola neve. ÉKEZETET NE használjon! Ez nem látszik a felhasználóknak.
+rem Az iskola neve. Ã‰KEZETET NE hasznÃ¡ljon! Ez nem lÃ¡tszik a felhasznÃ¡lÃ³knak.
 set param2=-SchoolName 'Probavari Altalanos Iskola' 
 
-rem Az iskola címe. ÉKEZETET NE használjon! Ez nem látszik a felhasználóknak.
+rem Az iskola cÃ­me. Ã‰KEZETET NE hasznÃ¡ljon! Ez nem lÃ¡tszik a felhasznÃ¡lÃ³knak.
 set param3=-SchoolAddress '4500 Probavar Kossuth u. 26.' 
 
-rem Az Office 365 környezet domain neve
+rem Az Office 365 kÃ¶rnyezet domain neve
 set param4=-UPNSuffix 'probavarsuli.hu'
 set param5=-tenantid probavarsuli.hu
 
-rem Felhasználók kezdõ jelszavának eleje Legyen legalább 4 betû, kisbetût, nagybetût és egy jelet is tartalmazzon. 
-rem A kezdõ jelszóba az itt megadott prefix után a felhasználó saját oktatási azonosítójának utolsó 4 számjegye kerül.
+rem FelhasznÃ¡lÃ³k kezdÅ‘ jelszavÃ¡nak eleje Legyen legalÃ¡bb 4 betÅ±, kisbetÅ±t, nagybetÅ±t Ã©s egy jelet is tartalmazzon. 
+rem A kezdÅ‘ jelszÃ³ba az itt megadott prefix utÃ¡n a felhasznÃ¡lÃ³ sajÃ¡t oktatÃ¡si azonosÃ­tÃ³jÃ¡nak utolsÃ³ 4 szÃ¡mjegye kerÃ¼l.
 set param7=-PasswordPrefix 'KL.Bp' 
 
-rem --- Ez alatt a vonal alatt nem kell módosítani a 2019/20 tanévben ---
+rem --- Ez alatt a vonal alatt nem kell mÃ³dosÃ­tani a 2019/20 tanÃ©vben ---
 
-rem Tanév, most nem kell szerkeszteni
+rem TanÃ©v, most nem kell szerkeszteni
 set param6=-StudentYear 201920
-rem Naplózás szintje, most nem kell szerkeszteni
-set param8=-LogLevel "Debug" 
+rem NaplÃ³zÃ¡s szintje, most nem kell szerkeszteni
+set param8=-LogLevel "Debug"
+
+rem VezetÃ©knÃ©v Ã©s keresztnÃ©v fordÃ­tott kezelÃ©se (Csak akkor hasznÃ¡ljuk, ha magyar nevezÃ©ktan szerint kell kÃ©pezni a Displayname Ã©rtÃ©ket)
+rem $true Ã©rtÃ©knÃ©l fordÃ­tott nevezÃ©ktan
+set param9=-FlipFirstnameLastname:$false
+
 echo Ugye nem felejtetted el tanulmanyozni az UTMUTATO.txt-t?
 echo .
 cd %~dp0
-powershell -executionpolicy bypass ".\bin\eKretaLaunch.ps1" %param1% %param2% %param3% %param4% %param5% %param6% %param7% %param8%
+powershell -executionpolicy bypass ".\bin\eKretaLaunch.ps1" %param1% %param2% %param3% %param4% %param5% %param6% %param7% %param8% %param9%
 pause Ellenorizd a kimenetet, masold ki a hibakat, ha voltak! Aztan nyomj meg egy gombot. Reszletes naplok a log mappaban vannak.
