@@ -501,6 +501,7 @@ Function eKreta2Convert() {
     #  Versioning 
     $version = "20200415.1"
 
+    # Poc megjegyzés
     # Check prereq
     try {
         import-module PSFramework -NoClobber -ErrorAction Stop
