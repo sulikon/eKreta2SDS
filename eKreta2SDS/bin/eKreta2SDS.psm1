@@ -499,7 +499,7 @@ Function eKreta2Convert() {
         [Parameter()][switch]$FlipFirstnameLastname = $false
     )
     #  Versioning 
-    $version = "20200415.1"
+    $version = "20200415.2"
 
     # Check prereq
     try {
@@ -585,7 +585,7 @@ Function eKreta2Convert() {
         #Import Excel1
         try {
             Write-PSFMessage -Level Host "Tanulók excel import elkezdődött"
-            $Excel1 = Import-XLSX $Input_tanulok
+            $Excel1 = Import-XLSX $Input_tanulok  | Where-Object {![string]::IsNullOrWhiteSpace($_.Vezetéknév) -and ![string]::IsNullOrWhiteSpace($_.Utónév) -and ![string]::IsNullOrWhiteSpace($_.'Oktatási azonosító')}
             if (!$Excel1) {
                 throw 
             }
