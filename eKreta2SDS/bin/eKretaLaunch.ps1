@@ -1,4 +1,4 @@
-# Copyright 2020 EURO ONE Számítástechnikai Zártkörűen Működő Részvénytársaság
+﻿# Copyright 2020 EURO ONE Számítástechnikai Zártkörűen Működő Részvénytársaság
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, 
 # including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -37,7 +37,7 @@ Param (
     [switch]$SkipeKretaConvert = $false , #don't process the convert parts
     [switch]$newCred = $false, # Force request New Credential
     [Parameter()][switch]$FlipFirstnameLastname =  $false, # reverse display name if $true
-    [Parameter()][String]$AzureADCredential = "eKreta2SDS-"
+    [Parameter()][String]$AzureADCredential = "" # Stored credential name in Windows Credential Manager
     )
 
 if ($loglevel -match "TRANSCRIPT") {
@@ -258,8 +258,12 @@ function CallConvert {
 try {
     
     # Alapértelmezésben: eKreta2SDS-[tenantID]
-    $azureCred = $AzureADCredential + $TenantID 
-
+    if ($AzureADCredential -eq "") {
+      $azureCred = "eKreta2SDS-" + $TenantID 
+    }
+    else {
+      $azureCred = $AzureADCredential
+    }
     #Tárolt felhasználó lekérdezése
     $cred = Get-StoredCredential -Target $azureCred 
 
