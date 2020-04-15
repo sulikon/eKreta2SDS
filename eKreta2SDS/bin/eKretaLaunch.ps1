@@ -36,7 +36,8 @@ Param (
     [Parameter()][string]$NonTrustedADDomainDC, # If there any DC, then we auhenticate against this DC
     [switch]$SkipeKretaConvert = $false , #don't process the convert parts
     [switch]$newCred = $false, # Force request New Credential
-    [Parameter()][switch]$FlipFirstnameLastname =  $false # reverse display name if $true
+    [Parameter()][switch]$FlipFirstnameLastname =  $false, # reverse display name if $true
+    [Parameter()][String]$AzureADCredential = ""
     )
 
 if ($loglevel -match "TRANSCRIPT") {
@@ -308,11 +309,16 @@ function CallConvert {
 #  Get Credential
 ##########################################
 try {
-    $key = Get-AESKey(join-path (Get-Location) "aes.key")
-    $credpath = (join-path (Get-Location) "mycred.key")
-    $cred = Get-MyCredential $credpath $newCred
-    write-PSFMessage "Got new credential $($cred.username)"
-   
+    # $key = Get-AESKey(join-path (Get-Location) "aes.key")
+    # $credpath = (join-path (Get-Location) "mycred.key")
+    # $cred = Get-MyCredential $credpath $newCred
+    # write-PSFMessage "Got new credential $($cred.username)"
+
+    $cred = Get-StoredCredential -Target $AzureADCredential #Tárolt felhasználó lekérdezése
+
+    if($null -eq $cred){
+        $cred = Get-Credential
+    }
 }
 Catch {
     write-PSFMessage -level host "Kérem, adja meg az érvényes hitelesítő adatokat az Azure AD tenanthoz!" 
@@ -320,6 +326,7 @@ Catch {
 }
 #$username = $cred.UserName
 #$password = $cred.GetNetworkCredential().Password
+
 $AzureCredential = $cred
 InitAdUsers
 
