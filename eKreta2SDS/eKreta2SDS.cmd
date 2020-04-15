@@ -29,6 +29,9 @@ rem Vezetéknév és keresztnév fordított kezelése (Csak akkor használjuk, ha magya
 rem $true értéknél fordított nevezéktan
 set param9=-FlipFirstnameLastname:$false
 
+rem Windows Credential Manager-ben létrehozott Credential neve, ha nincs megadva, akkor minden furásnál be kell jelentkezni
+rem set param10=-AzureADCredential "eKreta2SDS-"
+
 echo Ugye nem felejtetted el tanulmanyozni az UTMUTATO.txt-t?
 echo .
 cd %~dp0
