@@ -37,7 +37,7 @@ Param (
     [switch]$SkipeKretaConvert = $false , #don't process the convert parts
     [switch]$newCred = $false, # Force request New Credential
     [Parameter()][switch]$FlipFirstnameLastname =  $false, # reverse display name if $true
-    [Parameter()][String]$AzureADCredential = ""
+    [Parameter()][String]$AzureADCredential = "eKreta2SDS-"
     )
 
 if ($loglevel -match "TRANSCRIPT") {
@@ -89,67 +89,6 @@ else
     Write-PSFMessage -level Host -Message "Running mode: Only Azure Active Directory"
 }
 
-###########################################
-# Export-AESKey
-###########################################
-Function Export-AESKey($AESKeyFilePath) {
-    # Generate a random AES Encryption Key.
-    $AESKey = New-Object Byte[] 32
-    [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($AESKey)
-	
-    # Store the AESKey into a file. This file should be protected!  (e.g. ACL on the file to allow only select people to read)
-    Set-Content $AESKeyFilePath $AESKey   # Any existing AES Key file will be overwritten		
-
-} # end function Export-AESKey
-
-###########################################
-# Get-AESKey
-###########################################
-Function Get-AESKey($AESKeyFilePath) {
-    write-host "GET AESKEY $AESKeyFilePath "
-    if (!(Test-Path -Path $AESKeyFilePath -PathType Leaf)) {
-        write-debug  "export AESKEY"
-        Export-AESKey ($AESKeyFilePath)
-    }
-    Get-Content $AESKeyFilePath
-
-} # end fucntion Get-AESKey
-
-###########################################
-# Export-Credential
-# Usage: Export-Credential $CredentialObject $FileToSaveTo
-###########################################
-function Export-Credential($cred, $path) {
-    $cred = $cred | Select-Object *
-    $cred.password = $cred.Password | ConvertFrom-SecureString -key $key[1..16]
-    #$cred | Export-Clixml $path
-    Export-Clixml -inputobject $cred -path $path -Force
-} # // end-function 
-
-###########################################
-# Get-MyCredential
-###########################################
-function Get-MyCredential([STRING] $CredPath, [Boolean] $newCred = $FALSE) {
-    if ($newCred -or !(Test-Path -Path $CredPath -PathType Leaf)) { 
-        Export-Credential (Get-Credential) $CredPath
-    }
-    $cred = Import-Clixml $CredPath
-    
-    try {
-        $credPassword = $cred.Password | ConvertTo-SecureString -key $key[1..16]
-    }
-    catch {
-        write-warning "Invalid AES Key, stored credential" 
-        break;
-    }
-    
-    $Credential = New-Object System.Management.Automation.PsCredential($cred.UserName, $credPassword)
-    Return $Credential
-}
-# // end-function # Get-MyCredential
-
-
-
 $global:azureadusers = @{ }
 #create hash table from AD users!
 function InitADUsers {
@@ -170,7 +109,16 @@ function InitADUsers {
             #$AzureCredential = Get-Credential #temporary solution TODO
             if ($AzureCredential) {
                 #Doesn't works with MFA!!!!
-                $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP -Credential $AzureCredential
+                try
+                {
+                    $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP -Credential $AzureCredential
+                }
+                catch
+                {
+                    $null = Get-Credential | New-StoredCredential -Target $azureCred
+                    $AzureCredential = Get-StoredCredential -Target $azureCred
+                    $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP -Credential $AzureCredential
+                }
             }
             else {
                 Write-PSFMessage -level host "Azure AD kapcsolat. Várakozás a bejelentkezésre. A login ablak megjelenhet a háttérben is!"
@@ -184,7 +132,6 @@ function InitADUsers {
         exit
     }
 }
-
 
 function CreateADusers {
     [CMdletBinding()]
@@ -309,15 +256,16 @@ function CallConvert {
 #  Get Credential
 ##########################################
 try {
-    # $key = Get-AESKey(join-path (Get-Location) "aes.key")
-    # $credpath = (join-path (Get-Location) "mycred.key")
-    # $cred = Get-MyCredential $credpath $newCred
-    # write-PSFMessage "Got new credential $($cred.username)"
+    
+    # Alapértelmezésben: eKreta2SDS-[tenantID]
+    $azureCred = $AzureADCredential + $TenantID 
 
-    $cred = Get-StoredCredential -Target $AzureADCredential #Tárolt felhasználó lekérdezése
+    #Tárolt felhasználó lekérdezése
+    $cred = Get-StoredCredential -Target $azureCred 
 
     if($null -eq $cred){
-        $cred = Get-Credential
+       $null = Get-Credential | New-StoredCredential -Target $azureCred
+       $cred = Get-StoredCredential -Target $azureCred
     }
 }
 Catch {
