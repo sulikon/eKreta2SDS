@@ -499,7 +499,7 @@ Function eKreta2Convert() {
         [Parameter()][switch]$FlipFirstnameLastname = $false
     )
     #  Versioning 
-    $version = "20200331.1"
+    $version = "20200415.1"
 
     # Check prereq
     try {
@@ -622,8 +622,8 @@ Function eKreta2Convert() {
             $_.TeacherName0 = Get-OVerride "TeacherName" $_.Pedagógus $_.Pedagógus
             $_.'SIS ID' = Get-TeacherID $_.Pedagógus $_.'SIS ID' $true # Speciális SIS ID-t eredeti nem overrideolt névből kell venni!
             $_.TeacherName0 = Convert-Teachername $_.TeacherName0 $_.'SIS ID'       
-            $_.TeacherFirstName = Get-UserFirstName $_.TeacherName0
-            $_.TeacherLastName = Get-UserLastName $_.TeacherName0
+            $_.TeacherFirstName = Get-UserFirstName -fullname $_.TeacherName0 -FlipFirstnameLastname:$FlipFirstnameLastname
+            $_.TeacherLastName = Get-UserLastName -fullname $_.TeacherName0 -FlipFirstnameLastname:$FlipFirstnameLastname
             if ($Schoolid -eq $SchoolIdB) {
                 $t = $_.TeacherLastName
                 $_.TeacherLastName = $_.TeacherFirstName
@@ -934,8 +934,8 @@ Function eKreta2Convert() {
 
             $global:sid = 1000000
             $Users2 = $users | select-object @{Name = "Email"; expression = { $_.'E-mail cím' } },
-            @{Name = "First Name"; expression = { get-UserFirstname $_.'Gondviselő neve' } },
-            @{Name = "Last Name"; expression = { get-UserLastname $_.'Gondviselő neve' } },
+            @{Name = "First Name"; expression = { get-UserFirstname -fullname $_.'Gondviselő neve' -FlipFirstnameLastname:$FlipFirstnameLastname} },
+            @{Name = "Last Name"; expression = { get-UserLastname -fullname $_.'Gondviselő neve' -FlipFirstnameLastname:$FlipFirstnameLastname} },
             @{Name = "SIS ID"; expression = { $(fSId).ToString() } }
 
 
