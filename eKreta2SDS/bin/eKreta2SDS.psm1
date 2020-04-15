@@ -410,7 +410,7 @@ function get-UserLastname {
 
 function Generate-StudentPassword {
     param ([string] $ID)
-    if (($id.Length -ge 4) -and ($SchoolId -ne $SchoolIdSopron )) {
+    if ($id.Length -ge 4) {
         return "$PasswordPrefix$($ID.Substring($ID.length-4))"    
     }
     else {
@@ -421,7 +421,7 @@ function Generate-StudentPassword {
 
 function Generate-TeacherPassword {
     param ([string] $ID)
-    if (($id.Length -ge 4) -and ($SchoolId -ne $SchoolIdSopron )) {
+    if ($id.Length -ge 4) {
         return "$PasswordPrefix$($ID.Substring($ID.length-4))"    
     }
     else {
@@ -554,9 +554,6 @@ Function eKreta2Convert() {
     #Check for pre-2020.03.31 generated SID for users with no ID in source
     $global:oldgeneratedsid=0
 
-    #For School specific codes, we check the current SchoolID against these variables
-    $SchoolIDB = "B"
-
     $Namingwithdots = 1
     $Namingnodots = 2
     
@@ -624,12 +621,6 @@ Function eKreta2Convert() {
             $_.TeacherName0 = Convert-Teachername $_.TeacherName0 $_.'SIS ID'       
             $_.TeacherFirstName = Get-UserFirstName -fullname $_.TeacherName0 -FlipFirstnameLastname:$FlipFirstnameLastname
             $_.TeacherLastName = Get-UserLastName -fullname $_.TeacherName0 -FlipFirstnameLastname:$FlipFirstnameLastname
-            if ($Schoolid -eq $SchoolIdB) {
-                $t = $_.TeacherLastName
-                $_.TeacherLastName = $_.TeacherFirstName
-                $_.TeacherFirstName = $t
-            }
-    
 
             #Get Username
             $TeacherUsername = Get-Username $_.TeacherName0 $_.'SIS ID'
@@ -741,12 +732,6 @@ Function eKreta2Convert() {
                 $_.StudentFullName = "$($_.'Last Name') $($_.'First Name')" # From overrided Firstname lastname. # "$_.StudentLastName $_.StudentFirstName" give strange output!
             }
 
-            if ( $Schoolid -eq $SchoolIdB) {
-                $t = $_.'Last Name'
-                $_.'Last Name' = $_.'First Name'
-                $_.'First Name' = $t
-            }
-                        
             #Get Username
             $StudentUsername = get-Username $_.StudentFullName $_.'SIS ID'
     
