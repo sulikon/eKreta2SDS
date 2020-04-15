@@ -378,11 +378,15 @@ function Get-Username {
 
 #Give back the Firstname from FullName
 function get-UserFirstname {
-    Param([string] $fullname)
+    Param([string] $fullname, [switch]$FlipFirstnameLastname)
     #check override
     $userfullname = Get-OverRide "TeacherName" $fullname $fullname
     $parts = $userfullname.Split(" ")
-    $fn = $parts[$parts.count - 1]
+    if ($FlipFirstnameLastname) {
+        $fn = ($parts[0..($parts.count - 2)]) -join " "
+    } else {
+        $fn = $parts[$parts.count - 1]
+    }
     Return $fn
 }
 
@@ -390,11 +394,16 @@ function get-UserFirstname {
 #Give back the Lastname from FullName
 # The lastnames is all names except Firstname!
 function get-UserLastname {
-    Param([string] $fullname)
+    Param([string] $fullname, [switch]$FlipFirstnameLastname)
     #check override
     $userfullname = Get-OverRide "TeacherName" $fullname $fullname
     $parts = $userfullname.Split(" ")
-    $ln = ($parts[0..($parts.count - 2)]) -join " "
+    if ($FlipFirstnameLastname) {
+        $ln = $parts[$parts.count - 1]
+    } else {
+        $ln = ($parts[0..($parts.count - 2)]) -join " "
+    }
+    
     Return $ln
 }
 
@@ -486,10 +495,11 @@ Function eKreta2Convert() {
         [Parameter()][switch]$AddUPNSuffix = $false, # exported files contain full UPN Names
         [Parameter()][switch]$SkipAzureADCheck = $false, # can be skipe the azure ad connection and check!
         [Parameter()][System.Management.Automation.PSCredential]$AzureCredential = [System.Management.Automation.PSCredential]::Empty,
-        [Parameter()][string]$PasswordPrefix = "PwdPrefix"
+        [Parameter()][string]$PasswordPrefix = "PwdPrefix",
+        [Parameter()][switch]$FlipFirstnameLastname = $false
     )
     #  Versioning 
-    $version = "20200331.1"
+    $version = "20200415.1"
 
     # Check prereq
     try {
@@ -612,8 +622,8 @@ Function eKreta2Convert() {
             $_.TeacherName0 = Get-OVerride "TeacherName" $_.Pedagógus $_.Pedagógus
             $_.'SIS ID' = Get-TeacherID $_.Pedagógus $_.'SIS ID' $true # Speciális SIS ID-t eredeti nem overrideolt névből kell venni!
             $_.TeacherName0 = Convert-Teachername $_.TeacherName0 $_.'SIS ID'       
-            $_.TeacherFirstName = Get-UserFirstName $_.TeacherName0
-            $_.TeacherLastName = Get-UserLastName $_.TeacherName0
+            $_.TeacherFirstName = Get-UserFirstName -fullname $_.TeacherName0 -FlipFirstnameLastname:$FlipFirstnameLastname
+            $_.TeacherLastName = Get-UserLastName -fullname $_.TeacherName0 -FlipFirstnameLastname:$FlipFirstnameLastname
             if ($Schoolid -eq $SchoolIdB) {
                 $t = $_.TeacherLastName
                 $_.TeacherLastName = $_.TeacherFirstName
@@ -721,10 +731,15 @@ Function eKreta2Convert() {
             if ($LogLevel -match "DEBUG") {
                 Write-PSFMessage -Level Debug  "IN :$_"
             }
-            $_.'First Name' = Get-Override "StudentID2FirstName" $_.'SIS ID' $_.UtóNév
-            $_.'Last Name' = Get-Override "StudentID2LastName" $_.'SIS ID' $_.Vezetéknév
-    
-            $_.StudentFullName = "$($_.'Last Name') $($_.'First Name')" # From overrided Firstname lastname. # "$_.StudentLastName $_.StudentFirstName" give strange output!
+            if ($FlipFirstnameLastname) {
+                $_.'First Name' = Get-Override "StudentID2FirstName" $_.'SIS ID' $_.Vezetéknév
+                $_.'Last Name' = Get-Override "StudentID2LastName" $_.'SIS ID' $_.UtóNév
+                $_.StudentFullName = "$($_.'First Name') $($_.'Last Name')"
+            } else {
+                $_.'First Name' = Get-Override "StudentID2FirstName" $_.'SIS ID' $_.UtóNév
+                $_.'Last Name' = Get-Override "StudentID2LastName" $_.'SIS ID' $_.Vezetéknév
+                $_.StudentFullName = "$($_.'Last Name') $($_.'First Name')" # From overrided Firstname lastname. # "$_.StudentLastName $_.StudentFirstName" give strange output!
+            }
 
             if ( $Schoolid -eq $SchoolIdB) {
                 $t = $_.'Last Name'
@@ -919,8 +934,8 @@ Function eKreta2Convert() {
 
             $global:sid = 1000000
             $Users2 = $users | select-object @{Name = "Email"; expression = { $_.'E-mail cím' } },
-            @{Name = "First Name"; expression = { get-UserFirstname $_.'Gondviselő neve' } },
-            @{Name = "Last Name"; expression = { get-UserLastname $_.'Gondviselő neve' } },
+            @{Name = "First Name"; expression = { get-UserFirstname -fullname $_.'Gondviselő neve' -FlipFirstnameLastname:$FlipFirstnameLastname} },
+            @{Name = "Last Name"; expression = { get-UserLastname -fullname $_.'Gondviselő neve' -FlipFirstnameLastname:$FlipFirstnameLastname} },
             @{Name = "SIS ID"; expression = { $(fSId).ToString() } }
 
 

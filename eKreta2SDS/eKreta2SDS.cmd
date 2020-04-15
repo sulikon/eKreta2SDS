@@ -23,9 +23,14 @@ rem --- Ez alatt a vonal alatt nem kell módosítani a 2019/20 tanévben ---
 rem Tanév, most nem kell szerkeszteni
 set param6=-StudentYear 201920
 rem Naplózás szintje, most nem kell szerkeszteni
-set param8=-LogLevel "Debug" 
+set param8=-LogLevel "Debug"
+
+rem Vezetéknév és keresztnév fordított kezelése (Csak akkor használjuk, ha magyar nevezéktan szerint kell képezni a Displayname értéket)
+rem $true értéknél fordított nevezéktan
+set param9=-FlipFirstnameLastname:$false
+
 echo Ugye nem felejtetted el tanulmanyozni az UTMUTATO.txt-t?
 echo .
 cd %~dp0
-powershell -executionpolicy bypass ".\bin\eKretaLaunch.ps1" %param1% %param2% %param3% %param4% %param5% %param6% %param7% %param8%
+powershell -executionpolicy bypass ".\bin\eKretaLaunch.ps1" %param1% %param2% %param3% %param4% %param5% %param6% %param7% %param8% %param9%
 pause Ellenorizd a kimenetet, masold ki a hibakat, ha voltak! Aztan nyomj meg egy gombot. Reszletes naplok a log mappaban vannak.
