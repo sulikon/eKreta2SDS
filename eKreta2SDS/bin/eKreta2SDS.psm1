@@ -613,7 +613,7 @@ Function eKreta2Convert() {
         #>
 
         #Teachers raw data selection from Excel, and additional columen declarations. Denormalized rows filtering fore uniqueness.
-        $Teachers = $excel1 | ? { ($_.Tantárgy) -and ($_.Pedagógus) } | sort-object Pedagógus, 'Pedagógus oktatási azonosító'  -Unique |
+        [array]$Teachers = $excel1 | ? { ($_.Tantárgy) -and ($_.Pedagógus) } | sort-object Pedagógus, 'Pedagógus oktatási azonosító'  -Unique |
         select-object Pedagógus, 'Pedagógus oktatási azonosító', @{Name = "TeacherName0"; expression = " " }, @{Name = "SIS ID"; expression = 'Pedagógus oktatási azonosító' }, @{Name = "TeacherFirstName"; expression = " " }, @{Name = "TeacherLastName"; expression = " " }, @{Name = "TeacherUserName"; expression = " " }, @{Name = "ADUserName"; expression = " " }
         
         # Column values creation in Teachers array
