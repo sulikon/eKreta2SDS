@@ -36,9 +36,9 @@ Param (
     [Parameter()][string]$NonTrustedADDomainDC, # If there any DC, then we auhenticate against this DC
     [switch]$SkipeKretaConvert = $false , #don't process the convert parts
     [switch]$newCred = $false, # Force request New Credential
-    [Parameter()][switch]$FlipFirstnameLastname =  $false, # reverse display name if $true
+    [Parameter()][switch]$FlipFirstnameLastname = $false, # reverse display name if $true
     [Parameter()][String]$AzureADCredential = "" # Stored credential name in Windows Credential Manager
-    )
+)
 
 if ($loglevel -match "TRANSCRIPT") {
     Start-transcript "$LogPath\eKreta2SDS-Transcript-$LogDate.Log"
@@ -80,12 +80,10 @@ $LogDate = "$($(get-date).Year)" + $(get-date).month.ToString("00") + $(get-date
 Set-PSFLoggingProvider -Name 'LogFile' -FilePath "$LogPath\eKretaLaunch-$LogDate.Log" -Enabled $true
 Write-PSFMessage -level Host -Message "eKretaLaunch Script started. Version:$Version. Logpath: $LogPath"  
 
-if ($DomainName) 
-{
+if ($DomainName) {
     Write-PSFMessage -level Host -Message "Running mode: Local AD + Azure Active Directory"
 }
-else
-{
+else {
     Write-PSFMessage -level Host -Message "Running mode: Only Azure Active Directory"
 }
 
@@ -109,12 +107,10 @@ function InitADUsers {
             #$AzureCredential = Get-Credential #temporary solution TODO
             if ($AzureCredential) {
                 #Doesn't works with MFA!!!!
-                try
-                {
+                try {
                     $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP -Credential $AzureCredential
                 }
-                catch
-                {
+                catch {
                     $null = Get-Credential | New-StoredCredential -Target $azureCred
                     $AzureCredential = Get-StoredCredential -Target $azureCred
                     $null = Connect-AzureAD -tenantID $tenantID -ErrorAction STOP -Credential $AzureCredential
@@ -259,17 +255,17 @@ try {
     
     # Alapértelmezésben: eKreta2SDS-[tenantID]
     if ($AzureADCredential -eq "") {
-      $azureCred = "eKreta2SDS-" + $TenantID 
+        $azureCred = "eKreta2SDS-" + $TenantID 
     }
     else {
-      $azureCred = $AzureADCredential
+        $azureCred = $AzureADCredential
     }
     #Tárolt felhasználó lekérdezése
     $cred = Get-StoredCredential -Target $azureCred 
 
-    if($null -eq $cred){
-       $null = Get-Credential | New-StoredCredential -Target $azureCred
-       $cred = Get-StoredCredential -Target $azureCred
+    if ($null -eq $cred) {
+        $null = Get-Credential | New-StoredCredential -Target $azureCred
+        $cred = Get-StoredCredential -Target $azureCred
     }
 }
 Catch {
@@ -298,66 +294,90 @@ try {
     if (!$SkipeKretaConvert) {
         $eKretaResult = CallConvert 
     }
-    if ((test-path "$outputPath\$localADStudents") -or ((test-path "$outputPath\$LocalADTeachers"))) {
+
+    if ($DomainName) {
+        if ((test-path "$outputPath\$localADStudents") -or ((test-path "$outputPath\$LocalADTeachers"))) {
         
-        # Write-host "ADmin account for Domain"
-        Write-PSFMessage "Start Create Teachers Local AD Account"
-        if ($NonTrustedADDomainDC) {
-            $adcred = get-credential -Message "Admin for $NonTrustedADDomainDC"
-        }
+            # Write-host "ADmin account for Domain"
+            Write-PSFMessage "Start Create Teachers Local AD Account"
+            if ($NonTrustedADDomainDC) {
+                $adcred = get-credential -Message "Admin for $NonTrustedADDomainDC"
+            }
 
-        if (test-path "$outputPath\$LocalADTeachers" ) {
-            CreateADusers  "$outputPath\$LocalADTeachers" $OUNameTeachers
-            $tc = import-csv "$outputPath\$localADTeachers" -Delimiter $OutputCSVDelimiter #this is from SDS output, with outputdelimiter
-        }
-        Write-PSFMessage "Start Create Students Local AD Account"
-        if (test-path "$outputPath\$localADStudents" ) {
-            CreateADusers  "$outputPath\$localADStudents" $OUNameStudents
-            $St = import-csv "$outputPath\$localADStudents" -Delimiter $OutputCSVDelimiter #this is from SDS output, with outputdelimiter
-        }
-        Write-PSFMessage "Finish Create Students Local AD Account"
+            if (test-path "$outputPath\$LocalADTeachers" ) {
+                CreateADusers  "$outputPath\$LocalADTeachers" $OUNameTeachers
+                $tc = import-csv "$outputPath\$localADTeachers" -Delimiter $OutputCSVDelimiter #this is from SDS output, with outputdelimiter
+            }
+            Write-PSFMessage "Start Create Students Local AD Account"
+            if (test-path "$outputPath\$localADStudents" ) {
+                CreateADusers  "$outputPath\$localADStudents" $OUNameStudents
+                $St = import-csv "$outputPath\$localADStudents" -Delimiter $OutputCSVDelimiter #this is from SDS output, with outputdelimiter
+            }
+            Write-PSFMessage "Finish Create Students Local AD Account"
 
-    }   
-    else {
-#        write-host "Local AD CSV files not found." # commented out to reduce complexity using AAD only mode
-    }
+        }   
+        else {
+            write-host "Local AD CSV files not found." # commented out to reduce complexity using AAD only mode
+        }
     
-    # Wait for sync
-    # TODO push ADconnect sync
-    $ad = $st + $tc
+        # Wait for sync
+        # TODO push ADconnect sync
+
+        if ($tc -is [System.Management.Automation.PSCustomObject]) {
+            $tc = @($tc)
+        }
+
+        if ($st -is [System.Management.Automation.PSCustomObject]) {
+            $st = @($st)
+        }
+
+        $ad = $st + $tc
        
-    $maxwaittime = 3600 # Loop
-    $waittime = 5 # seconds between check iterations
-    $totalusers = $ad.count
-    $waitusers = $totalusers
-    $loopcount = 0
-    do {
-        $ad | % {              
-            $username = $_.username
-            $user = CheckAzureADUser $username
-            if (!$user) {
-                #"WAit for user"
+        $maxwaittime = 3600 # Loop
+        $waittime = 5 # seconds between check iterations
+        $totalusers = $ad.count
+        $waitusers = $totalusers
+        $loopcount = 0
+        do {
+            $ad | % {
+                if ($_.username -ne "") {           
+                    $username = $_.username
+                    $user = CheckAzureADUser $username
+                    if (!$user) {
+                        #"WAit for user"
+                    }
+                    else {
+                        Write-psfmessage "User found in Azuread $username"
+                        $_.username = ""
+                        $waitusers = $waitusers - 1  
+                    }
+                }
             }
-            else {
-                Write-psfmessage "User found in Azuread $username"
-                $_.username = ""
-                $waitusers = $waitusers - 1  
+            
+            if ($waitusers -gt 0) {
+                write-host "Várakozás  $waitusers felhasználó létrehozására összesen $totalusers felhasználóból.   Próbálkozások száma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenytűleütésre megáll."
+                Start-Sleep -Seconds $waittime
             }
-        }
-        if ($waitusers -gt 0) {
-            write-host "Várakozás  $waitusers felhasználó létrehozására összesen $totalusers felhasználóból.   Próbálkozások száma: $loopcount  / $($maxwaittime / $waittime) iteration. Billenytűleütésre megáll."
-            Start-Sleep -Seconds $waittime
-        }
-        # waiting until : key pressed or reach max wait time or  no more missing user
-    } While ( !$Host.UI.RawUI.KeyAvailable -and ($loopcount++ -lt ($maxwaittime / $waittime) -and ($waitusers -gt 0)))
-    if (($totalusers -gt 0 )) {
-        # There were missig AD users. Repeat the conversions to fill the output csv-s with the missing users.
-        write-psfmessage "$totalusers local AD users managed, repeat eKreta2Convert"
-        if (!$SkipeKretaConvert) {
-            $eKretaResult = CallConvert 
+
+            if ($Host.UI.RawUI.KeyAvailable) {
+                $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyUp,IncludeKeyDown")
+                if ($key.KeyDown -eq "True") {
+                    Write-Host "Kilépés az ellenőrzésből, kérem várjon...." -Background DarkRed
+                    break   
+                } 	
+            }
+            # waiting until : key pressed or reach max wait time or  no more missing user
+			
+        } While (( $loopcount++ -lt ($maxwaittime / $waittime)) -and ($waitusers -gt 0))
+        if (($totalusers -gt 0 )) {
+            # There were missig AD users. Repeat the conversions to fill the output csv-s with the missing users.
+            write-psfmessage "$totalusers local AD users managed, repeat eKreta2Convert"
+            if (!$SkipeKretaConvert) {
+                $eKretaResult = CallConvert 
+            }
         }
     }
-       
+
     # Copy exported files to target 
         
     if (![string]::IsNullOrEmpty($SDSFolder) ) {
