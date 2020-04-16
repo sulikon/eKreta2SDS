@@ -586,12 +586,10 @@ Function eKreta2Convert() {
         #Import Excel1
         try {
             Write-PSFMessage -Level Host "Tanulók excel import elkezdődött"
-            $Excel1 = Import-XLSX $Input_tanulok | Where-Object { ![string]::IsNullOrWhiteSpace($_.Vezetéknév) -and ![string]::IsNullOrWhiteSpace($_.Utónév) -and ![string]::IsNullOrWhiteSpace($_.'Oktatási azonosító') }
+            [array]$Excel1 = Import-XLSX $Input_tanulok | Where-Object { ![string]::IsNullOrWhiteSpace($_.Vezetéknév) -and ![string]::IsNullOrWhiteSpace($_.Utónév) -and ![string]::IsNullOrWhiteSpace($_.'Oktatási azonosító') }
             if (!$Excel1) {
                 throw 
             }
-
-           if ($Excel1 -is [System.Management.Automation.PSCustomObject]) { $Excel1 = @($Excel1) }
 
             Write-PSFMessage -Level Host "Tanulók excel import  $Input_tanulok befejeződött, $($Excel1.Count) sor betöltődött" -Tag "Report"
         }
@@ -619,7 +617,7 @@ Function eKreta2Convert() {
         select-object Pedagógus, 'Pedagógus oktatási azonosító', @{Name = "TeacherName0"; expression = " " }, @{Name = "SIS ID"; expression = 'Pedagógus oktatási azonosító' }, @{Name = "TeacherFirstName"; expression = " " }, @{Name = "TeacherLastName"; expression = " " }, @{Name = "TeacherUserName"; expression = " " }, @{Name = "ADUserName"; expression = " " }
         
         # Column values creation in Teachers array
-        $teachers | % {
+        [array]$teachers | % {
             if ($LogLevel -match "DEBUG") {
                 Write-PSFMessage -Level Debug "IN :$_"
             }
@@ -645,22 +643,16 @@ Function eKreta2Convert() {
                 Write-PSFMessage -Level Debug "OUT:$_"
             }
         } # End While
-        
-        if ($teachers -is [System.Management.Automation.PSCustomObject]) { $teachers = @($teachers) }
 
         $allteacher = $teachers.count
     
         #Filter out missing SIS ID rows, empty usernames and refilter for uniqueness. Get-Teachername can return with empoty username!
-        $teachers2 = $teachers | ? { ![string]::IsNullOrWhiteSpace($_.'SIS ID') -and ![string]::IsNullOrWhiteSpace($_.TeacherUsername) } | sort-object TeacherName0, 'SIS ID' -Unique
-        
-        if ($teachers2 -is [System.Management.Automation.PSCustomObject]) { $teachers2 = @($teachers2) }
+        [array]$teachers2 = $teachers | ? { ![string]::IsNullOrWhiteSpace($_.'SIS ID') -and ![string]::IsNullOrWhiteSpace($_.TeacherUsername) } | sort-object TeacherName0, 'SIS ID' -Unique
         
         Write-PSFMessage -tag "Report" "Total $allteacher  teacher record,  $($teachers2.count) unique records. Missing SIDs or Username after processing:  $($Allteacher-$teachers2.count)"
 
         #Throw exceptions if there are still for Empty SID
-        $chk_t1 = $Teachers | ? { !$_.'SIS ID' }
-
-        if ($chk_t1 -is [System.Management.Automation.PSCustomObject]) { $chk_t1 =  @($chk_t1) }
+        [array]$chk_t1 = $Teachers | ? { !$_.'SIS ID' }
 
         if ($chk_t1.count -gt 0) {
             Write-PSFMessage -level Critical -tag "Error" "*** Tanárok hiányzó egyedi oktatási azonosítói ***"
@@ -671,10 +663,8 @@ Function eKreta2Convert() {
         #User records needed to create in Local AD mode
         if ($DomainName) {
             # Local AD MODE. LocalADusers: note exist in AzureAD
-            $LocalADCreateTeachers = $teachers2 | ? { [string]::IsNullOrWhiteSpace($_.ADUserName) } 
-            $teachers2 = $teachers2 | ? { ![string]::IsNullOrWhiteSpace($_.ADUserName) }   #remove non AD users from SIS Export users
-            
-            if ($LocalADCreateTeachers -is [System.Management.Automation.PSCustomObject]) {$LocalADcreateTeachers = @($LocalADCreateTeachers) }
+            [array]$LocalADCreateTeachers = $teachers2 | ? { [string]::IsNullOrWhiteSpace($_.ADUserName) } 
+            [array]$teachers2 = $teachers2 | ? { ![string]::IsNullOrWhiteSpace($_.ADUserName) }   #remove non AD users from SIS Export users
             
             if ($LocalADcreateTeachers.Count -gt 0) {
                 Write-PSFMessage -level Host -tag "Report" "Needed teacher user account in Local AD:  $($LocalADcreateTeachers.Count)"
@@ -688,7 +678,7 @@ Function eKreta2Convert() {
         }
 
         #Teachers
-        $teachersexport = $Teachers2 | select-object *, @{Name = "School SIS ID"; expression = { $schoolid } },
+        [array]$teachersexport = $Teachers2 | select-object *, @{Name = "School SIS ID"; expression = { $schoolid } },
         @{Name = "First Name"; expression = { $_.TeacherFirstName } },  
         @{Name = "Last Name"; expression = { $_.TeacherLastName } },
         @{Name = "Username"; expression = {
@@ -702,8 +692,6 @@ Function eKreta2Convert() {
         @{Name = "Password"; expression = { Generate-TeacherPassword $_.'SIS ID' } }
 
         if ($teachersexport) {
-
-            if ($teachersexport -is [System.Management.Automation.PSCustomObject]) { $teachersexport = @($teachersexport) } 
 
             $null = $teachersexport | Select-object "SIS ID", "School SIS ID", "First name", "Last Name", "UserName", "Password" | 
             export-csv "$outputPath\teacher.csv" -delimiter $OutputCSVDelimiter -Encoding UTF8 -NoTypeInformation    
@@ -722,9 +710,7 @@ Function eKreta2Convert() {
         $students = $excel1 | select-object Vezetéknév, Utónév, "Oktatási azonosító" | sort-object "Oktatási azonosító" -unique
 
         #Throw exceptions for Empty SID.
-        $chk_s1 = $student | ? { !$_.'SIS ID' }
-
-        if ($chk_s1 -is [System.Management.Automation.PSCustomObject]) { $chk_s1 = @($chk_s1) } 
+        [array]$chk_s1 = $student | ? { !$_.'SIS ID' }
 
         if ($chk_s1.count -gt 0) {
             Write-PSFHost -level Critical -Tag "ERROR" "*** Tanulók hiányzó egyedi oktatási azonosítóval ***"
@@ -732,7 +718,7 @@ Function eKreta2Convert() {
             throw "ERROR: Kezeljék a hiányzó tanulói azonosítókat"
         }
 
-        $students2 = $students | select-object * ,
+        [array]$students2 = $students | select-object * ,
         @{Name = "SIS ID"; expression = { $_.'Oktatási azonosító' } },
         @{Name = "School SIS ID"; expression = { $schoolid } },
         @{Name = "First Name"; expression = " " },
@@ -776,25 +762,18 @@ Function eKreta2Convert() {
     
         } #End While
 
-        if ($students2 -is [System.Management.Automation.PSCustomObject]) { $students2 = @($students2) } 
-
         $allstudents = $students2.count
 
         #Filter out missing SIS ID rows, empty usernames and refilter for uniqueness. Get-Teachername can return with empoty username!
-        $students2 = $students2 | ? { (![string]::IsNullOrWhiteSpace($_.'SIS ID')) -and (![string]::IsNullOrWhiteSpace($_.Username)) } | sort-object StudentFullName, 'SIS ID' -Unique
-        
-        if ($students2 -is [System.Management.Automation.PSCustomObject]) { $students2 = @($students2) }
+        [array]$students2 = $students2 | ? { (![string]::IsNullOrWhiteSpace($_.'SIS ID')) -and (![string]::IsNullOrWhiteSpace($_.Username)) } | sort-object StudentFullName, 'SIS ID' -Unique
 
         Write-PSFMessage -tag "Report" "Total $allstudents  student record,  $($students2.count) unique records. Missing SIDs or Username after processing:  $($allstudents-$students2.count)"
 
         #User records needed to create in Local AD mode
         if ($DomainName) {
             # Local AD MODE
-            $LocalADCreateStudents = $students2 | ? { [string]::IsNullOrWhiteSpace($_.ADUserName) } 
-            $students2 = $students2 | ? { ![string]::IsNullOrWhiteSpace($_.ADUserName) } 
-            
-           if ($LocalADCreateStudents -is [System.Management.Automation.PSCustomObject]) {  $LocalADCreateStudents = @($LocalADCreateStudents) } 
-           if ($students2 -is [System.Management.Automation.PSCustomObject]) {  $students2 = @($students2) } 
+            [array]$LocalADCreateStudents = $students2 | ? { [string]::IsNullOrWhiteSpace($_.ADUserName) } 
+            [array]$students2 = $students2 | ? { ![string]::IsNullOrWhiteSpace($_.ADUserName) } 
 
             if ($LocalADCreateStudents.Count -gt 0) {
                 Write-PSFMessage  -level Host -tag "Report" "Needed student user account in Local AD:  $($LocalADCreateStudents.Count)"                
@@ -817,10 +796,8 @@ Function eKreta2Convert() {
         }
 
 
-        $studentsExport = $students2 | Select-object "SIS ID", "School SIS ID", "First name", "Last Name",  
+        [array]$studentsExport = $students2 | Select-object "SIS ID", "School SIS ID", "First name", "Last Name",  
         @{Name = "Username"; expression = { if ($AddUpnSuffix) { $_.Username } else { $_.Username.Split("@")[0] } } }, @{Name = "Password"; expression = { Generate-StudentPassword $_.'SIS ID' } }
-        
-        if ($studentsExport -is [System.Management.Automation.PSCustomObject]) { $studentsExport = @($studentsExport) } 
 
         if ($studentsExport) {
             $studentsExport | export-csv "$outputPath\student.csv" -delimiter $OutputCSVDelimiter -Encoding UTF8 -NoTypeInformation
@@ -848,9 +825,7 @@ Function eKreta2Convert() {
 
 
         #        $sec = $excel1 | select-object "Tantárgy", "Osztály / csoport" | sort-object  'Tantárgy'  -unique
-        $sec = $excel1 | select-object "Tantárgy", "Osztály / csoport" | sort-object  -Property @{Expression = { Get-SectionName $_."Tantárgy"  $_."Osztály / csoport" } }  -unique
-
-        if ($sec -is [System.Management.Automation.PSCustomObject]) { $sec = @($sec) } 
+        [array]$sec = $excel1 | select-object "Tantárgy", "Osztály / csoport" | sort-object  -Property @{Expression = { Get-SectionName $_."Tantárgy"  $_."Osztály / csoport" } }  -unique
 
         Write-PSFMessage -Tag "Report" "Tantárgy és osztály lekérdezés összes rekord: $($sec.count)"
 
@@ -865,9 +840,7 @@ Function eKreta2Convert() {
         }
         
         # and Export $sec2|ft
-        $SectionExport = $sec2 | select-object "SIS ID", "School SIS ID", @{Name = "Section Name"; expression = { $_.'Section Name' } }, "Course name" 
-        
-        if ($SectionExport -is [System.Management.Automation.PSCustomObject]) { $SectionExport = @($SectionExport) } 
+        [array]$SectionExport = $sec2 | select-object "SIS ID", "School SIS ID", @{Name = "Section Name"; expression = { $_.'Section Name' } }, "Course name" 
 
         # Export Sections
         $SectionExport | export-csv "$outputPath\section.csv" -delimiter $OutputCSVDelimiter -Encoding UTF8 -NoTypeInformation
@@ -877,18 +850,14 @@ Function eKreta2Convert() {
         ###################################################
         #Studentenrollment
         ###################################################
-        $Sec2St = $excel1 | select-object "Tantárgy", "Osztály / csoport", "Oktatási azonosító", 
+        [array]$Sec2St = $excel1 | select-object "Tantárgy", "Osztály / csoport", "Oktatási azonosító", 
         @{Name = "Section Name"; expression = { (Get-SectionName $_."Tantárgy"  $_."Osztály / csoport" ) } }
-        
-        if ($Sec2St -is [System.Management.Automation.PSCustomObject]) { $Sec2St = @($Sec2St) } 
         
         Write-PSFMessage -tag Report "Tanuló tantárgy ,osztály lekérdezés összes rekord: $($sec2st.count)"
 
-        $StudentEnroll = join-object -Left $sec2st  -Right $sec2 -LeftJoinProperty "Section Name" -RightJoinProperty "Section Name" -prefix L
+        [array]$StudentEnroll = join-object -Left $sec2st  -Right $sec2 -LeftJoinProperty "Section Name" -RightJoinProperty "Section Name" -prefix L
         $StudentEnroll | select-object @{Name = "Section SIS ID"; expression = { $_.'LSIS ID' } },
         @{Name = "SIS ID"; expression = { $_.'Oktatási azonosító' } } | export-csv "$outputPath\StudentEnrollment.csv" -delimiter "," -Encoding UTF8 -NoTypeInformation
-        
-        if ($StudentEnroll -is [System.Management.Automation.PSCustomObject]) { $StudentEnroll = @($StudentEnroll) } 
         
         Write-PSFMessage -Tag "Report" -level host "Tanulók órákhoz rendelése exportálás befejeződött (StudentEnrollment.csv), $($StudentEnroll.count) összerendelés."
 
@@ -899,10 +868,8 @@ Function eKreta2Convert() {
         ###################################################
         if ($null -ne $teachers2) {
             #there are teachers in output csv
-            $Sec2T = $excel1 | select-object "Tantárgy", "Osztály / csoport", "Pedagógus oktatási azonosító", "Pedagógus",
+            [array]$Sec2T = $excel1 | select-object "Tantárgy", "Osztály / csoport", "Pedagógus oktatási azonosító", "Pedagógus",
             @{Name = "Section Name"; expression = { (Get-SectionName $_."Tantárgy"  $_."Osztály / csoport" ) } }, @{Name = "SIS ID"; expression = 'Pedagógus oktatási azonosító' }
-            
-           if ($sec2t -is [System.Management.Automation.PSCustomObject]) {  $sec2t = @($sec2t) } 
             
             Write-PSFMessage -Tag "Report" "Tanár tantárgy ,osztály lekérdezés összes rekord: $($sec2t.count)"
   
@@ -921,13 +888,11 @@ Function eKreta2Convert() {
             #Teacher SID to table
 
             $sec2t3 = join-object -left $sec2t2 -right $Teachers2 -LeftJoinProperty 'SIS ID' -RightJoinProperty 'SIS ID'  -prefix L -Type AllInLeft
-            $TeacherEnroll = join-object -Left $sec2t3  -Right $sec2 -LeftJoinProperty "Section name" -RightJoinProperty "Section Name" -prefix L2
+            [array]$TeacherEnroll = join-object -Left $sec2t3  -Right $sec2 -LeftJoinProperty "Section name" -RightJoinProperty "Section Name" -prefix L2
 
             $TeacherEnroll | select-object @{Name = "Section SIS ID"; expression = { $_.'L2SIS ID' } },
             @{Name = "SIS ID"; expression = { $_.'LSIS ID' } } | 
             export-csv "$outputPath\TeacherRoster.csv"  -delimiter $OutputCSVDelimiter -NoTypeInformation -Encoding UTF8  
-            
-            if ($TeacherEnroll -is [System.Management.Automation.PSCustomObject]) { $TeacherEnroll = @($TeacherEnroll) } 
             
             Write-PSFMessage -level host -tag "Report" "Tanárok órákhoz rendelése exportálása befejeződött (TeacherRoster.csv), $($TeacherEnroll.count) összerendelés."
         }
@@ -947,12 +912,10 @@ Function eKreta2Convert() {
             #Import Excel2
             try {
                 Write-PSFMessage -Level Host "Gondviselők excel import elkezdődött"
-                $excel2 = Import-XLSX $Input_gondviselok
+                [array]$excel2 = Import-XLSX $Input_gondviselok
                 if (!$excel2) { 
                     throw
                 }
-
-                if ($excel2 -is [System.Management.Automation.PSCustomObject]) { $excel2 = @($excel2) } 
 
                 Write-PSFMessage -Level Host "Gondviselok excel import befejeződött, $($excel2.Count) sor betöltődött"
                 Write-PSFMessage -Tag "Report" "Number of  record in $Input_gondviselok excel $($excel2.Count)"
@@ -963,34 +926,28 @@ Function eKreta2Convert() {
             }
 
             #Guardianrelationship
-            $Users = $excel2 | ? { ($_.'E-mail cím'.Length) -gt 0 } | select-object 'Gondviselő neve', Telefon, 'E-mail cím' | sort-object 'Gondviselő neve', Telefon, 'E-mail cím' -Unique
-            
-            if ($Users -is [System.Management.Automation.PSCustomObject]) { $Users = @($Users) }
+            [array]$Users = $excel2 | ? { ($_.'E-mail cím'.Length) -gt 0 } | select-object 'Gondviselő neve', Telefon, 'E-mail cím' | sort-object 'Gondviselő neve', Telefon, 'E-mail cím' -Unique
             
             Write-PSFMessage -Level Host  "Egyedi Gondviselok száma email cím szűrése után: $($Users.Count) " -Tag "Report"
 
             $global:sid = 1000000
-            $Users2 = $users | select-object @{Name = "Email"; expression = { $_.'E-mail cím' } },
+            [array]$Users2 = $users | select-object @{Name = "Email"; expression = { $_.'E-mail cím' } },
             @{Name = "First Name"; expression = { get-UserFirstname -fullname $_.'Gondviselő neve' -FlipFirstnameLastname:$FlipFirstnameLastname } },
             @{Name = "Last Name"; expression = { get-UserLastname -fullname $_.'Gondviselő neve' -FlipFirstnameLastname:$FlipFirstnameLastname } },
             @{Name = "SIS ID"; expression = { $(fSId).ToString() } }
 
             $Users2 | select-object Email, 'First Name', 'Last Name', 'SIS ID' |
             export-csv "$outputPath\user.csv"  -delimiter $OutputCSVDelimiter -NoTypeInformation -Encoding UTF8  
-            
-            if ($Users2 -is [System.Management.Automation.PSCustomObject]) { $Users2 = @($Users2) } 
 
             Write-PSFMessage -level host -Tag "Report" "Gondviselok exportálása befejeződött (user.csv), $($Users2.count)."
 
-            $GuardianRelationShip = $excel2 | ? { ($_.'E-mail cím').Length -gt 0 } |
+            [array]$GuardianRelationShip = $excel2 | ? { ($_.'E-mail cím').Length -gt 0 } |
             select-object @{Name = "SIS ID"; expression = { $_.'Oktatási azonosító' } }, 
             @{Name = "Email"; expression = { $_.'E-mail cím' } },
             @{Name = "Role"; expression = { $_.'Rokonság foka' } }
 
             $GuardianRelationSHip | select-object 'SIS ID', Email, Role |
-            export-csv "$outputPath\GuardianRelationShip.csv"  -delimiter $OutputCSVDelimiter -NoTypeInformation -Encoding UTF8  
-            
-            if ($GuardianRelationSHip -is [System.Management.Automation.PSCustomObject]) { $GuardianRelationSHip = @($GuardianRelationSHip) } 
+            export-csv "$outputPath\GuardianRelationShip.csv"  -delimiter $OutputCSVDelimiter -NoTypeInformation -Encoding UTF8 
             
             Write-PSFMessage -level host -Tag "Report" "Gondviselok tanulókhoz rendelése exportálása befejeződött (GuardianRelationShip.csv), $($GuardianRelationSHip.count) összerendelés."
             $eKretaResult = "OK"
