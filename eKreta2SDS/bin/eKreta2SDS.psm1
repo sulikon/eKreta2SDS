@@ -617,7 +617,7 @@ Function eKreta2Convert() {
         select-object Pedagógus, 'Pedagógus oktatási azonosító', @{Name = "TeacherName0"; expression = " " }, @{Name = "SIS ID"; expression = 'Pedagógus oktatási azonosító' }, @{Name = "TeacherFirstName"; expression = " " }, @{Name = "TeacherLastName"; expression = " " }, @{Name = "TeacherUserName"; expression = " " }, @{Name = "ADUserName"; expression = " " }
         
         # Column values creation in Teachers array
-        [array]$teachers | % {
+        $teachers | % {
             if ($LogLevel -match "DEBUG") {
                 Write-PSFMessage -Level Debug "IN :$_"
             }
@@ -974,4 +974,3 @@ Function eKreta2Convert() {
 
 
 Export-ModuleMember -Function  eKreta2Convert
-
