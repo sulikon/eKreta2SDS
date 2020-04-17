@@ -130,6 +130,12 @@ Function Get-Override {
 }
 
 function InitAzureAD {
+
+    param (
+        [string]$DomainName = "",
+        [switch]$CheckADUsers = $false
+    )
+
     try {
         Write-PSFMessage "Connect to azure ad: $tenantID"
         try {
@@ -174,7 +180,9 @@ function InitAzureAD {
                 # detect pre-2020.03.31 generated SIDs to warn user to put them in override
                 $global:oldgeneratedsid++
             }
-            $global:azureadusers[$_.UserPrincipalName] = $SID
+            if (!($DomainName -and $CheckADUsers)) {
+                $global:azureadusers[$_.UserPrincipalName] = $SID
+            }
         }
         Write-PSFMessage -level host "Azure AD userek betöltése befejezödött: $($global:azureadusers.count) user account letöltődött."
         Write-PSFMessage -tag Report "Azure AD users retrieved from Azure: $($global:azureadusers.count)"            
@@ -500,10 +508,11 @@ Function eKreta2Convert() {
         [Parameter()][switch]$SkipAzureADCheck = $false, # can be skipe the azure ad connection and check!
         [Parameter()][System.Management.Automation.PSCredential]$AzureCredential = [System.Management.Automation.PSCredential]::Empty,
         [Parameter()][string]$PasswordPrefix = "PwdPrefix",
-        [Parameter()][switch]$FlipFirstnameLastname = $false
+        [Parameter()][switch]$FlipFirstnameLastname = $false,
+        [Parameter()][switch]$CheckADUsers = $false
     )
     #  Versioning 
-    $version = "20200415.2"
+    $version = "20200417.1"
 
     # Check prereq
     try {
@@ -575,7 +584,7 @@ Function eKreta2Convert() {
         try {
             InitOverride
             if (!$SkipAzureAdUserCheck) {
-                InitAzureAD
+                InitAzureAD -DomainName $DomainName -CheckADUsers $CheckADUsers
             }
         }
         catch {
