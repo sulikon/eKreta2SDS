@@ -37,7 +37,8 @@ Param (
     [switch]$SkipeKretaConvert = $false , #don't process the convert parts
     [switch]$newCred = $false, # Force request New Credential
     [Parameter()][switch]$FlipFirstnameLastname = $false, # reverse display name if $true
-    [Parameter()][String]$AzureADCredential = "" # Stored credential name in Windows Credential Manager
+    [Parameter()][String]$AzureADCredential = "", # Stored credential name in Windows Credential Manager
+    [Parameter()][switch]$CheckADUsers = $false # If is $true and Local AD mode is active, then always check the Local AD users
 )
 
 if ($loglevel -match "TRANSCRIPT") {
@@ -61,7 +62,7 @@ catch {
 }
 
 #  Versioning 
-$version = "20200415.1"
+$version = "20200417.1"
 
 #Determine $PSR Script Root path
 if ($null -ne $psISE) {
@@ -239,7 +240,7 @@ function CheckAzureADUser {
 }
 
 function CallConvert {
-    return  eKreta2Convert "$SchoolID" "$SchoolName" "$SchoolAddress" "$Input_tanulok" -UPNSuffix "$UPNSuffix" -tenantID "$tenantID" -PasswordPrefix $PasswordPrefix -AzureCredential $AzureCredential -DomainName $DomainName -StudentYear $StudentYear -outputPath $outputpath -LogPath $logpath -FlipFirstnameLastname:$FlipFirstnameLastname
+    return  eKreta2Convert "$SchoolID" "$SchoolName" "$SchoolAddress" "$Input_tanulok" -UPNSuffix "$UPNSuffix" -tenantID "$tenantID" -PasswordPrefix $PasswordPrefix -AzureCredential $AzureCredential -DomainName $DomainName -StudentYear $StudentYear -outputPath $outputpath -LogPath $logpath -FlipFirstnameLastname:$FlipFirstnameLastname -CheckADUsers:$CheckADUsers
     #reset the  LOG destination to the launcher!
     Set-PSFLoggingProvider -Name 'LogFile' -FilePath "$LogPath\eKretaLaunch-$LogDate.Log" -Enabled $true
 }
@@ -306,12 +307,12 @@ try {
 
             if (test-path "$outputPath\$LocalADTeachers" ) {
                 CreateADusers  "$outputPath\$LocalADTeachers" $OUNameTeachers
-                $tc = import-csv "$outputPath\$localADTeachers" -Delimiter $OutputCSVDelimiter #this is from SDS output, with outputdelimiter
+                [array]$tc = import-csv "$outputPath\$localADTeachers" -Delimiter $OutputCSVDelimiter #this is from SDS output, with outputdelimiter
             }
             Write-PSFMessage "Start Create Students Local AD Account"
             if (test-path "$outputPath\$localADStudents" ) {
                 CreateADusers  "$outputPath\$localADStudents" $OUNameStudents
-                $St = import-csv "$outputPath\$localADStudents" -Delimiter $OutputCSVDelimiter #this is from SDS output, with outputdelimiter
+                [array]$St = import-csv "$outputPath\$localADStudents" -Delimiter $OutputCSVDelimiter #this is from SDS output, with outputdelimiter
             }
             Write-PSFMessage "Finish Create Students Local AD Account"
 
@@ -322,14 +323,6 @@ try {
     
         # Wait for sync
         # TODO push ADconnect sync
-
-        if ($tc -is [System.Management.Automation.PSCustomObject]) {
-            $tc = @($tc)
-        }
-
-        if ($st -is [System.Management.Automation.PSCustomObject]) {
-            $st = @($st)
-        }
 
         $ad = $st + $tc
        
