@@ -21,7 +21,7 @@ Előfeltételek:
    Elérhetősége KRÉTA adminisztrátor felhasználóval: 
    "Nyilvántartások" felső menü, benne "Tanulók"
    A felső soron "Export" és a megjelenő listából válasszuk a "Tanulók tantárgyai és pedagógusai" elemet.
-7) Windows 10-es számítógép
+7) 64 bites Windows 10-et futtató számítógép
 8) Powershell 5.1, ami így ellenőrizhető parancssorból: powershell $PSVersionTable.PSVersion
 
 Telepítés:
