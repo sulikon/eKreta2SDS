@@ -46,9 +46,14 @@ if ($loglevel -match "TRANSCRIPT") {
 }
 
 $OutputCSVDelimiter = ","
-$InputCSVDelimiter = ";"
+# $InputCSVDelimiter = ";" # Not used in code
 
 # Check prereq
+If ( ![Environment]::Is64BitProcess ) {
+    Write-Host "Hiba: a futtatás 32 bites Windowson nem támogatott" -ForegroundColor Red
+    exit
+}
+
 try {
     import-module PSFramework -NoClobber -ErrorAction Stop
     import-module AzureAd -NoClobber -ErrorAction Stop
@@ -64,13 +69,6 @@ catch {
 #  Versioning 
 $version = "20200417.1"
 
-#Determine $PSR Script Root path
-if ($null -ne $psISE) {
-    $PSR = Split-Path -Path $psISE.CurrentFile.FullPath        
-}
-else {
-    $PSR = $PSScriptRoot
-}
 if ($OutputPath -eq ".") {
     $OutputPath = Get-Location 
 }
@@ -94,7 +92,7 @@ function InitADUsers {
     try {
         Write-PSFMessage "Connect to azure ad: $tenantID"
         try {
-            $AzureAdConnected = $null -ne (Get-AzureAddomain -erroraction SilentlyContinue | ? { $_.Name -EQ $TenantID })
+            $AzureAdConnected = $null -ne (Get-AzureAddomain -erroraction SilentlyContinue | Where-Object { $_.Name -EQ $TenantID })
         }
         Catch {
             $AzureAdConnected = $false
@@ -293,7 +291,7 @@ try {
     
     
     if (!$SkipeKretaConvert) {
-        $eKretaResult = CallConvert 
+        $null = CallConvert 
     }
 
     if ($DomainName) {
@@ -332,7 +330,7 @@ try {
         $waitusers = $totalusers
         $loopcount = 0
         do {
-            $ad | % {
+            $ad | ForEach-Object {
                 if ($_.username -ne "") {           
                     $username = $_.username
                     $user = CheckAzureADUser $username
@@ -366,7 +364,7 @@ try {
             # There were missig AD users. Repeat the conversions to fill the output csv-s with the missing users.
             write-psfmessage "$totalusers local AD users managed, repeat eKreta2Convert"
             if (!$SkipeKretaConvert) {
-                $eKretaResult = CallConvert 
+                $null = CallConvert 
             }
         }
     }
