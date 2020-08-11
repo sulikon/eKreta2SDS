@@ -24,8 +24,8 @@ Param (
     [string] $Input_gondviselok = "", # the default parameters for input files. Clear or Change  default value le for production use!
     [Parameter()][string]$UPNSuffix = "" , # the default parameters for input files. Clear or Change  default value le for production use! # mandatory on production
     [Parameter()][string]$StudentYear = "201920", # mandatory on production
-    [Parameter()][string]$OutputPath = ".\output",
-    [Parameter()][string]$LogPath = ".\log" ,
+    [Parameter()][string]$OutputPath = ".\output", # Tracelog bevezetésével megszűnik
+    [Parameter()][string]$LogPath = ".\log" , # Tracelog bevezetésével megszűnik
     [Parameter()][string]$SDSFolder = "",
     [Parameter()][string]$DomainName = "", # If domain name exists, it means On Prem AD + AD connect usage!
     [Parameter()][String]$TenantID = "", #for AzureAD connect, the tenantid is the ONMicrosoft domain nam of tenant.
@@ -67,17 +67,69 @@ catch {
 }
 
 #  Versioning 
-$version = "20200417.1"
+# $version = "20200417.1"
+# Külön fájlba kivezetve csak master branch-be mergeléskor állítjuk
+. .\bin\eKretaVersion.ps1
 
-if ($OutputPath -eq ".") {
-    $OutputPath = Get-Location 
+# Tracelog bevezetésével megszűnik 
+
+# if ($OutputPath -eq ".") {
+#     $OutputPath = Get-Location 
+# }
+# if ($LogPath -eq ".\log") {
+#     $LogPath = Join-Path (Get-Location) "log"
+# }
+
+
+# TraceLog mappa előkészítése 
+
+$dateFolder = (Get-Date).ToString('yyyyMMdd')
+
+# Óra perc is szükséges, ha egy nap töbször fut a script
+$HourMinFolder = (Get-Date).ToString('HHmm')
+
+$TraceLogFolder = (Get-Location), "TraceLog", $dateFolder, $HourMinFolder -join "\"
+
+# Ha még nincs Initial mappa, akkor létre kell hozni és a régi logokat, input és output fájlokat bemásolni
+$initialFolder = (Get-Location), "TraceLog", "Initial" -join "\"
+
+$inputFolder = Join-Path (Get-Location) "input"
+
+if(!(Test-Path -Path $initialFolder)){
+    try {
+        New-Item -ItemType Directory -Path $initialFolder | Out-Null
+
+        $LogFolder = Join-Path (Get-Location) "log"
+        $outputFolder = Join-Path (Get-Location) "output"
+
+        Copy-Item -Path $LogFolder -Destination $initialFolder -Recurse | Out-Null
+        Copy-Item -Path $outputFolder -Destination $initialFolder -Recurse | Out-Null
+        Copy-Item -Path $inputFolder -Destination $initialFolder -Recurse | Out-Null
+
+    } Catch {
+        Write-Host "Initial folder creation error. ($initialFolder)" -ForegroundColor Red
+    }
+}    
+
+# Output folder beállítása
+$outputPath = Join-Path $TraceLogFolder "Outputs"
+
+try {
+    New-Item -ItemType Directory -Force -Path $TraceLogFolder | Out-Null
+    New-Item -ItemType Directory -Force -Path $outputPath | Out-Null
+} Catch { 
+    Write-Host -level critical "TraceLog folder creation error. ($TraceLogFolder)" -ForegroundColor Red
 }
-if ($LogPath -eq ".\log") {
-    $LogPath = Join-Path (Get-Location) "log"
-}
-$LogDate = "$($(get-date).Year)" + $(get-date).month.ToString("00") + $(get-date).Day.ToString("00") + "-" + $(get-date).Hour.ToString("00") + $(get-date).minute.ToString("00")
+
+# Az input állományokat be is másoljuk
+Copy-Item -Path $inputFolder -Destination $TraceLogFolder -Recurse | Out-Null
+
+# Log beállítása
+$LogDate = (Get-Date).ToString('yyyyMMdd-HHmm')
+$LogPath = Join-Path $TraceLogFolder "Logs"
+
 Set-PSFLoggingProvider -Name 'LogFile' -FilePath "$LogPath\eKretaLaunch-$LogDate.Log" -Enabled $true
-Write-PSFMessage -level Host -Message "eKretaLaunch Script started. Version:$Version. Logpath: $LogPath"  
+Write-PSFMessage -level Host -Message "eKretaLaunch Script started. Version:$Version. Logpath: $LogPath"
 
 if ($DomainName) {
     Write-PSFMessage -level Host -Message "Running mode: Local AD + Azure Active Directory"
