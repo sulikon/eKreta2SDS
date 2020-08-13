@@ -106,11 +106,23 @@ function Remove-StringDiacritic {
 
 function InitOverride {
     try {
-        Import-Csv $OverrideFile -Delimiter $InputCSVDelimiter | ForEach-Object { $Overridetable[$_.schoolid + ":" + $_.Type + ":" + $_.Key] = $_.Data }
+        $global:OverrideArray = Import-Csv $OverrideFile -Delimiter $InputCSVDelimiter 
+		$global:OverrideArray | ForEach-Object { $Overridetable[$_.schoolid + ":" + $_.Type + ":" + $_.Key] = $_.Data }
+        
         #for multiple column New-Object -Type PSCustomObject -Property @{'Value' = '$_.Data'}             
     }
     catch {
         Write-PSFMessage "Unable to initializeImport Override.csv!" -ErrorRecord $_
+    }
+}
+
+Function Write-Override {
+	try {
+		#$global:OverrideArray | ForEach-Object { Write-Host $_.Type}
+		$global:OverrideArray | export-csv $OverrideFile -delimiter $InputCSVDelimiter -Encoding UTF8 -NoTypeInformation
+	}
+	catch {
+        Write-PSFMessage "Error write Override.csv!" -ErrorRecord $_
     }
 }
 
@@ -201,6 +213,12 @@ function InitAzureAD {
                 }
             }
         }
+        $overrideMAXSecID = 0
+		$global:OverrideArray | Where-Object { $_.Type -eq "SectionName2ID"} | ForEach-Object { if ([int]$_.Data -gt $overrideMAXSecID){ $overrideMAXSecID = [int]$_.Data} }
+		
+		if ($Global:sid -le $overrideMAXSecID) {
+			$Global:sid = $overrideMAXSecID
+		}
         # TODO:         
         #$azureadusers|foreach-object{$global:azureadusers[$_.UserPrincipalName] = "1"} 
         # Teacher SIS ID: extension_fe2174665583431c953114ff7268b7b3_Education_SyncSource_TeacherId
@@ -235,19 +253,27 @@ function Get-SectionID {
     param (
         [string] $SectionName
     )
-
-    if (!$SkipAzureADCheck) {
-        return fSId #AUTO INCREMENTED UNIQUE SID
-    }
-    else {
-        if ( $null -ne $global:Sections[$SectionName]) {
-            # Sectionname already exists in AD. Use the existing Section ID!
-            return $global:sections[$SectionName]
-        }
-        else {
-            return fSId #AUTO INCREMENTED UNIQUE SID
-        }
-    }
+	
+	$secID = Get-Override -type "SectionName2ID" -Key $SectionName -nonoverridedvalue "fsId"
+	
+	if ("fsId" -eq $secID) {
+        $secID = fSId #AUTO INCREMENTED UNIQUE SID
+        
+        $global:OverrideArray += New-Object –TypeName PSObject -Property @{Type = "SectionName2ID"; SchoolID = $schoolid; Key = $SectionName; Data = $secID }
+	} 
+	
+	if (!$SkipAzureADCheck) {
+		return $secID 
+	}
+	else {
+		if ( $null -ne $global:Sections[$SectionName]) {
+			# Sectionname already exists in AD. Use the existing Section ID!
+			return $global:sections[$SectionName]
+		}
+		else {
+			return $secID
+		}
+	}
 }
 
 
@@ -466,7 +492,23 @@ function Get-TeacherID {
                 Write-PSFMessage "# $TName0 régi azonosítójának megtartása:"  -Verbose
                 Write-PSFMessage "TeacherID2ID;$SchoolID;$TID;$oldTID"  -Verbose 
             }
+
+            if (!($OverrideArray | Where-Object { $_.Type -eq "TeacherName2ID" -and $_.Key -eq $TName0})) {
+				$global:OverrideArray += New-Object –TypeName PSObject -Property @{Type = "TeacherName2ID"; SchoolID = $schoolid; Key = $TName0; Data = $TID }
+			}
         }
+        # Oktatási azonosítóval nem rendelkező, de nem külsős (nincs [] jelölés) tanárok kezelése
+		if ($TID.length -eq 0) {
+		
+			$TID = (Get-Date).ToString('yyyyMMddHHmmss')
+			$fromArray = ($OverrideArray | Where-Object { $_.Type -eq "TeacherName2ID" -and $_.Key -eq $TName0})
+			
+			if (!$fromArray) {
+				$global:OverrideArray += New-Object –TypeName PSObject -Property @{Type = "TeacherName2ID"; SchoolID = $schoolid; Key = $TName0; Data = $TID }
+			} else {
+				$TID = $fromArray[0].Data
+			}
+		}
     }
     $TID = Get-Override "TeacherID2ID" $TID $TID
     return $TID
@@ -550,6 +592,7 @@ Function eKreta2Convert() {
 
     
     $OverrideTable = @{ }
+    [array]$global:OverrideArray = @()
     $OverrideFile = "$InputPath\Override.csv"
    
     $global:Usernames = @{ }
@@ -834,7 +877,7 @@ Function eKreta2Convert() {
         Write-PSFMessage -Tag "Report" "Tantárgy és osztály lekérdezés összes rekord: $($sec.count)"
 
         $sec2 = $sec | select-object *,
-        @{Name = "SIS ID"; expression = { fSId } },
+        @{Name = "SIS ID"; expression = { Get-SectionID  -SectionName (Get-SectionName $_."Tantárgy"  $_."Osztály / csoport") } },
         @{Name = "School SIS ID"; expression = { $schoolid } },
         @{Name = "Section Name"; expression = " " },
         @{Name = "Course Name"; expression = " " } 
@@ -882,7 +925,7 @@ Function eKreta2Convert() {
                 if ($loglevel -match "DEBUG") {
                     Write-PSFMessage -level DEBUG "Tanár aktuális rekord: $_"
                 }
-                $_.'SIS ID' = Get-OverRide "TeacherName2ID"  $_.Pedagógus  $_.'SIS ID'
+                #$_.'SIS ID' = Get-OverRide "TeacherName2ID"  $_.Pedagógus  $_.'SIS ID'
                 $_.'SIS ID' = Get-TeacherID $_.Pedagógus $_.'SIS ID' $false 
             }
 
@@ -956,6 +999,7 @@ Function eKreta2Convert() {
             Write-PSFMessage -level host -Tag "Report" "Gondviselok tanulókhoz rendelése exportálása befejeződött (GuardianRelationShip.csv), $($GuardianRelationSHip.count) összerendelés."
             $eKretaResult = "OK"
         }
+        Write-Override
     }
     catch {
         $Exception = $_.Exception
