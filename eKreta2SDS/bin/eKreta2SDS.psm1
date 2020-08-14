@@ -119,7 +119,7 @@ function InitOverride {
 Function Write-Override {
 	try {
 		#$global:OverrideArray | ForEach-Object { Write-Host $_.Type}
-		$global:OverrideArray | export-csv $OverrideFile -delimiter $InputCSVDelimiter -Encoding UTF8 -NoTypeInformation
+		$global:OverrideArray | Sort-Object -Property @{Expression = "Type"; Descending = $False}, @{Expression = "SchoolID"; Descending = $False} | export-csv $OverrideFile -delimiter $InputCSVDelimiter -Encoding UTF8 -NoTypeInformation
 	}
 	catch {
         Write-PSFMessage "Error write Override.csv!" -ErrorRecord $_
@@ -494,6 +494,9 @@ function Get-TeacherID {
             }
 
             if (!($OverrideArray | Where-Object { $_.Type -eq "TeacherName2ID" -and $_.Key -eq $TName0})) {
+
+                Write-PSFMessage "Az oktatási azonosítóval nem rendelkező külsős oktatóhoz ($TName0) a következő azonosító lett generálva és az override.csv mentve: $TID" -Verbose
+
 				$global:OverrideArray += New-Object –TypeName PSObject -Property @{Type = "TeacherName2ID"; SchoolID = $schoolid; Key = $TName0; Data = $TID }
 			}
         }
@@ -504,6 +507,8 @@ function Get-TeacherID {
 			$fromArray = ($OverrideArray | Where-Object { $_.Type -eq "TeacherName2ID" -and $_.Key -eq $TName0})
 			
 			if (!$fromArray) {
+                Write-PSFMessage "Az oktatási azonosítóval nem rendelkező oktatóhoz ($TName0) a következő azonosító lett generálva és az override.csv mentve: $TID" -Verbose
+                
 				$global:OverrideArray += New-Object –TypeName PSObject -Property @{Type = "TeacherName2ID"; SchoolID = $schoolid; Key = $TName0; Data = $TID }
 			} else {
 				$TID = $fromArray[0].Data
