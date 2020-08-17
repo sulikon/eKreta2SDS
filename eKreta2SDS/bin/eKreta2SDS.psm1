@@ -256,26 +256,48 @@ function Get-SectionID {
 	
 	$secID = Get-Override -type "SectionName2ID" -Key $SectionName -nonoverridedvalue "fsId"
 	
-	if ("fsId" -eq $secID) {
-        $secID = fSId #AUTO INCREMENTED UNIQUE SID
-        
-        $global:OverrideArray += New-Object –TypeName PSObject -Property @{Type = "SectionName2ID"; SchoolID = $schoolid; Key = $SectionName; Data = $secID }
+    # Ha nem, akkor generálunk ID, de ellenőrizzük, hogy volt-e már feltöltve ilyen section.
+	if ("fsID" -eq $secID) {
+		$secID = fSId #AUTO INCREMENTED UNIQUE SID
+		
+		[array]$FromAure = $global:ClassArray | Where-Object { $_.displayName -eq $SectionName }
+		
+		if ($null -eq $FromAure) {
+			# Ha nem volt még feltöltve, akkor a generált Id-val tároljuk le.
+			$global:OverrideArray += New-Object –TypeName PSObject -Property @{Type = "SectionName2ID"; SchoolID = $schoolid; Key = $SectionName; Data = $secID }
+		} else {
+			# Ha volt feltöltve, akkor kiválasztjuk a legtöbb diákkal rendelkező section-t, majd ellenőrizük, hogy a generált id eltér-e a már feltöltöttöl. 
+			[array]$FromAzureMax = $FromAure | Where-Object { $_.StudentCount -eq ($FromAure | Measure-Object -Property StudentCount -Maximum).Maximum }
+			
+			if ($FromAzureMax[0].externalId -ne $secID) {
+				# Loggoljuk, ha ilyen van
+				
+				Write-PSFMessage "A '$SectionName' nevű Section már létezik az AzureAD-ban. A most generált ID eltér, a már feltöltöttöl ($secID - $($FromAzureMax[0].externalId)). A már feltöltött section lesz az override.csv mentve, '($FromAzureMax[0].externalId)' Section ID-vel." -Verbose
+				
+				# Override Csv-be mentjük, ez lesz az alapértelmezett
+				
+				$global:OverrideArray += New-Object –TypeName PSObject -Property @{Type = "SectionName2ID"; SchoolID = $schoolid; Key = $SectionName; Data = $FromAzureMax[0].externalId }
+				
+			}
+		}	
+		
 	} 
 	
-	if (!$SkipAzureADCheck) {
-		return $secID 
-	}
-	else {
-		if ( $null -ne $global:Sections[$SectionName]) {
-			# Sectionname already exists in AD. Use the existing Section ID!
-			return $global:sections[$SectionName]
-		}
-		else {
-			return $secID
-		}
-	}
+	return $secID
+	
+	# if (!$SkipAzureADCheck) {
+	# 	return $secID 
+	# }
+	# else {
+	# 	if ( $null -ne $global:Sections[$SectionName]) {
+	# 		# Sectionname already exists in AD. Use the existing Section ID!
+	# 		return $global:sections[$SectionName]
+	# 	}
+	# 	else {
+	# 		return $secID
+	# 	}
+	# }
 }
-
 
 
 #Végső SectionName meghatározása
@@ -508,7 +530,7 @@ function Get-TeacherID {
 			
 			if (!$fromArray) {
                 Write-PSFMessage "Az oktatási azonosítóval nem rendelkező oktatóhoz ($TName0) a következő azonosító lett generálva és az override.csv mentve: $TID" -Verbose
-                
+
 				$global:OverrideArray += New-Object –TypeName PSObject -Property @{Type = "TeacherName2ID"; SchoolID = $schoolid; Key = $TName0; Data = $TID }
 			} else {
 				$TID = $fromArray[0].Data
@@ -523,7 +545,161 @@ function fSId {
     $global:sid++    
     return $global:sid
 }
-   
+
+### GraphApi helper fügvények
+Function Get-MSGraphAuthenticationToken 
+{
+
+    # Paraméterek
+    param (
+        [String]$clientId = "",
+        [String]$redirectUri = “urn:ietf:wg:oauth:2.0:oob”,
+        [String]$resourceURI = “https://graph.microsoft.com”,
+        [String]$authority = “https://login.microsoftonline.com/common”,
+        [pscredential]$Credential,
+        [String]$appSecret
+    )
+    $AadModule = Import-Module -Name AzureAD -ErrorAction Stop -PassThru
+    $adal = Join-Path $AadModule.ModuleBase “Microsoft.IdentityModel.Clients.ActiveDirectory.dll”
+    $adalforms = Join-Path $AadModule.ModuleBase “Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll”
+	
+    [System.Reflection.Assembly]::LoadFrom($adal) | Out-Null
+
+    [System.Reflection.Assembly]::LoadFrom($adalforms) | Out-Null
+	
+    if($appSecret -eq $null -or $appSecret -eq "")
+    {
+        Write-Host "Delegált engedély használata"
+
+        $authContext = New-Object “Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext” -ArgumentList $authority
+
+        if ($Credential -ne $null)
+        {
+        
+            #$SecurePassword = ConvertTo-SecureString -AsPlainText $Office365Password -Force
+            #$AADCredential = New-Object “Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential” -ArgumentList $Office365Username,$SecurePassword
+        
+            $AADCredential = New-Object "Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential" -ArgumentList $Credential.Username, $Credential.Password
+        
+            # Token lekérése
+            $authResult = [Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions]::AcquireTokenAsync($authContext, $resourceURI, $clientid, $AADCredential)
+
+        }
+        else
+        {
+            # Ha nincs Credential, akkor bekérjük a felhasználónevet és jelszót
+            $platformParameters = New-Object “Microsoft.IdentityModel.Clients.ActiveDirectory.PlatformParameters” -ArgumentList “Always”
+
+            $authResult = $authContext.AcquireTokenAsync($resourceURI, $ClientID, $RedirectUri, $platformParameters)
+
+        }
+    }
+    else
+    {
+        Write-Host "Alkalmazásengedély használata"
+        $Connection = Connect-AzureAD -Credential $Credential
+        $global:tenantID = $Connection.TenantId
+
+        $authString = "https://login.microsoftonline.com/$($tenantID)" 
+        $creds = New-Object "Microsoft.IdentityModel.Clients.ActiveDirectory.ClientCredential" -ArgumentList $appId, $appSecret
+        $authContext = New-Object "Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext"-ArgumentList $authString
+        $authResult = $authContext.AcquireTokenAsync("https://graph.microsoft.com/", $creds)
+
+    }
+
+    return $headers = @{
+                            Authorization   = $authResult.result.CreateAuthorizationHeader()
+                            'Content-Type'  = "application/json; charset=utf-8"
+                    }
+
+}
+
+
+# Http kérést megvalósító függvény
+
+Function callRestApi
+{
+    param (
+          $requestHeader,
+          [pscredential]$Credential,
+          $appId,
+          $JsonBody,
+          $callmethod,
+          $url
+    )
+
+    $createAssignmentResult = $null
+
+    if($requestHeader -eq $null)
+    {
+        $requestHeader = Get-MSGraphAuthenticationToken -Credential $Credential -clientId $appId -appSecret $appSecret
+    }
+
+    try
+    {
+        if($JsonBody -eq $null)
+        {
+            $requestResult = Invoke-WebRequest -Uri $url -Headers $requestHeader -Method $callmethod
+        }
+        else
+        {
+            $requestResult = Invoke-WebRequest -Uri $url -Headers $requestHeader -Method $callmethod -Body ([System.Text.Encoding]::UTF8.GetBytes($JsonBody))
+        }
+    }
+    catch
+    {
+        Write-Host "Http kérési hiba, Token újrakérése..."
+        $requestHeader = Get-MSGraphAuthenticationToken -Credential $Credential -clientId $appId -appSecret $appSecret
+        if($JsonBody -eq $null)
+        {
+            $requestResult = Invoke-WebRequest -Uri $url -Headers $requestHeader -Method $callmethod
+        }
+        else
+        {
+            $requestResult = Invoke-WebRequest -Uri $url -Headers $requestHeader -Method $callmethod -Body ([System.Text.Encoding]::UTF8.GetBytes($JsonBody))
+        }
+    }
+
+    return $requestResult
+
+}
+
+Function GetSectionsWithGraphApi {
+	
+	param (
+		[String]$app = "", # AzureAD-ban regisztrált alkalmazás azonosítója
+		[String]$sec = ""  # APP Kulcs    
+	)
+	if ($app -ne "" -and $sec -ne "") {
+		$requestHeader = Get-MSGraphAuthenticationToken -Credential $AzureCredential -clientId $app -appSecret $sec
+		
+		$Url = "https://graph.microsoft.com/beta/administrativeunits"+"?$"+"filter=extension_fe2174665583431c953114ff7268b7b3_Education_SyncSource_SchoolId eq '$schoolid'"
+		
+		# Iskola lekérése
+		$SchoolResult = callRestApi -url $Url -requestHeader $requestHeader -callmethod GET -appId $appId -Credential $AzureCredential
+		$SchoolZone = (ConvertFrom-Json -InputObject $SchoolResult.Content).value.extension_fe2174665583431c953114ff7268b7b3_Education_SchoolZone
+		$SchoolGIUD = (ConvertFrom-Json -InputObject $SchoolResult.Content).value.Id
+		
+		if ($null -eq $SchoolZone) {
+			# lekérjük az iskola osztályait, ha a Zone tulajdonság még nem volt írva
+
+			$Url = "https://graph.microsoft.com/beta/education/schools/$SchoolGIUD/Classes"
+
+			$ClassResult = callRestApi -url $Url -requestHeader $requestHeader -callmethod GET -appId $appId -Credential $AzureCredential
+			$global:ClassArray = (ConvertFrom-Json -InputObject $ClassResult.Content).value
+			$global:ClassArray | ForEach-Object { 
+				
+				$Url = "https://graph.microsoft.com/v1.0/education/classes/$($_.id)/members"
+			   
+				$MemberResult = callRestApi -url $Url -requestHeader $requestHeader -callmethod GET -appId $appId -Credential $AzureCredential
+				$MemberArray = (ConvertFrom-Json -InputObject $MemberResult.Content).value
+				
+				$_ | Add-Member -MemberType NoteProperty -Name "StudentCount" -Value ([array]($MemberArray | Where-Object {$_.primaryRole -eq "student"})).Count
+
+			}
+		}
+	}
+}
 
 ##################################################
 #eKreta2SDS funcion
@@ -556,7 +732,9 @@ Function eKreta2Convert() {
         [Parameter()][System.Management.Automation.PSCredential]$AzureCredential = [System.Management.Automation.PSCredential]::Empty,
         [Parameter()][string]$PasswordPrefix = "PwdPrefix",
         [Parameter()][switch]$FlipFirstnameLastname = $false,
-        [Parameter()][switch]$CheckADUsers = $false
+        [Parameter()][switch]$CheckADUsers = $false,
+        [Parameter()][String]$appId = "",  # AzureAD-ban regisztrált alkalmazás azonosítója GRAPH API-hoz
+        [Parameter()][String]$appSecret = ""   # APP Kulcs GRAPH API-hoz   
     )
     #  Versioning 
     # $version = "20200417.1"
@@ -598,6 +776,7 @@ Function eKreta2Convert() {
     
     $OverrideTable = @{ }
     [array]$global:OverrideArray = @()
+    [array]$global:ClassArray = @()
     $OverrideFile = "$InputPath\Override.csv"
    
     $global:Usernames = @{ }
@@ -634,6 +813,18 @@ Function eKreta2Convert() {
             Write-PSFMessage "Unable to initialize script!" -ErrorRecord $_
             throw "ERROR: Unable to initialize script"
         }
+
+        # Meglévő sectionok lekérdezése
+		if ($appId -ne "" -and $appSecret -ne "") {
+			try {
+				Write-PSFMessage -Level Host "Már feltöltött sectionok lekérdezése Graph Api használatával."
+				GetSectionsWithGraphApi -app $appId -sec $appSecret
+				
+				
+			} catch {
+				 Write-PSFMessage "Check session error" -ErrorRecord $_
+			}
+		}
 
         #Import Excel1
         try {
