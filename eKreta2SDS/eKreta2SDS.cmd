@@ -19,6 +19,10 @@ rem A kezdõ jelszóba az itt megadott prefix után a felhasználó saját oktatási az
 set param7=-PasswordPrefix 'KL.Bp' 
 
 rem --- Ez alatt a vonal alatt nem kell módosítani a 2019/20 tanévben ---
+echo EZ A SZOFTVER MÉG NINCS FELKÉSZÍTVE A 2020/21-ES ÉV KEZELÉSÉRE ILLETVE ÉVVÁLTÁSRA. 
+echo A KAPCSOLÓDÓ HIBÁK JAVÍTÁSA FOLYAMATBAN VAN, KÉRJÜK, MÉG NE HASZNÁLJA, KOMOLY GONDOT OKOZHAT.
+echo A FEJLEMÉNYEKRÕL A SULIKON FACEBOOK OLDALÁN (https://www.facebook.com/sulikoninfo) 
+echo ÉS TWITTER CSATORNÁJÁN (https://twitter.com/sulikoninfo) KÜLDÜNK ÉRTESÍTÉST.
 
 rem Tanév, most nem kell szerkeszteni
 set param6=-StudentYear 201920
