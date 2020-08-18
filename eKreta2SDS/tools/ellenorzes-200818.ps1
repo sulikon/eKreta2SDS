@@ -129,3 +129,5 @@ if ($RegiDiakLicencCount+$RegiTanarLicencCount -gt 0) {
 else {
     Write-Host "Office 365 A1 diák és tanár licencek használaton kívül: OK" -ForegroundColor Green
 } 
+
+Read-Host -Prompt "Üssön ENTER-t a kilépéshez!"
