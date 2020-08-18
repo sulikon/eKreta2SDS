@@ -1,4 +1,7 @@
-﻿Előfeltételek:
+﻿EZ A SZOFTVER MÉG NINCS FELKÉSZÍTVE A 2020/21-ES ÉV KEZELÉSÉRE ILLETVE ÉVVÁLTÁSRA. A KAPCSOLÓDÓ HIBÁK JAVÍTÁSA FOLYAMATBAN VAN, KÉRJÜK, MÉG NE HASZNÁLJA, KOMOLY GONDOT OKOZHAT.
+A FEJLEMÉNYEKRŐL A SULIKON FACEBOOK OLDALÁN (https://www.facebook.com/sulikoninfo) ÉS TWITTER CSATORNÁJÁN (https://twitter.com/sulikoninfo) KÜLDÜNK ÉRTESÍTÉST.
+
+Előfeltételek:
 
 1) Office 365 oktatási változat környezet, megfelelő mennyiségű tanári és diáklicenccel (akár a fél éves lejáró próbalicenc is jó)
    Ha ez nincs kész, a doc\Nulláról Teamsig.pdf alapján induljunk el. Ez lépésről lépésre mindent leír, ami most kell.
