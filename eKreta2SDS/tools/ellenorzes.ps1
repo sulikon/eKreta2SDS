@@ -134,8 +134,8 @@ if (($A1TanarVeglegesCount + $A1PlusTanarVeglegesCount -eq 0) -or ($A1DiakVegleg
     Write-Host "Végleges Office 365 A1 Plus for Students licencek száma:",($A1PlusDiakVeglegesCount)
     Write-Host "Végleges Office 365 A1 for Faculty licencek száma:",($A1TanarVeglegesCount)
     Write-Host "Végleges Office 365 A1 for Students licencek száma:",($A1DiakVeglegesCount)
-    Write-Host "Lejáró, próbaveriós Office 365 A1 for Faculty licencek száma:",($A1TanarProbaCount)
-    Write-Host "Lejáró, próbaveriós Office 365 A1 for Students licencek száma:",($A1DiakProbaCount)
+    Write-Host "Lejáró, próbaverziós Office 365 A1 for Faculty licencek száma:",($A1TanarProbaCount)
+    Write-Host "Lejáró, próbaverziós Office 365 A1 for Students licencek száma:",($A1DiakProbaCount)
     Write-Host "sulid.hu DNS domain létezik a környezetben? ",$sulidhuexists
     Write-Host "sulid.hu DNS domain ellenőrzött? ",$sulidhuverified
     if ($sulidhuverified) {
