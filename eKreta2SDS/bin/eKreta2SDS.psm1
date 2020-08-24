@@ -512,7 +512,9 @@ Function eKreta2Convert() {
         [Parameter()][switch]$CheckADUsers = $false
     )
     #  Versioning 
-    $version = "20200417.1"
+    # $version = "20200417.1"
+    # Külön fájlba kivezetve csak master branch-be mergeléskor állítjuk
+    . .\bin\eKretaVersion.ps1
 
     # Check prereq
     try {
@@ -903,7 +905,7 @@ Function eKreta2Convert() {
         # School
         ###################################################
         
-        $Schoolinfo = @([pscustomobject]@{'SIS ID' = $schoolid; Name = $SchoolName; Address = $SchoolAddress })
+        $Schoolinfo = @([pscustomobject]@{'SIS ID' = $schoolid; Name = $SchoolName; Address = $SchoolAddress; Zone = $Version })
         $Schoolinfo | export-csv "$outputPath\School.csv" -delimiter $OutputCSVDelimiter -Encoding UTF8 -NoTypeInformation
         
         ###################################################
