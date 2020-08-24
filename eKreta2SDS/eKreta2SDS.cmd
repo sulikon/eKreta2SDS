@@ -36,6 +36,12 @@ set param9=-FlipFirstnameLastname:$false
 rem Windows Credential Manager-ben létrehozott Credential neve, ha nincs megadva, akkor minden furásnál be kell jelentkezni
 rem set param10=-AzureADCredential "eKreta2SDS-"
 
+rem AzureAD-ban regisztrált alkalmazás azonosítója GRAPH API-hoz. Ha nincs megadva, akkor nem lesz Graph Api használva.
+rem set param11=-AppId "123456"
+
+rem APP Kulcs GRAPH API-hoz. Ha nincs megadva, akkor nem lesz Graph Api használva.
+rem set param12=-AppSecret "123456"
+
 echo Ugye nem felejtetted el tanulmanyozni az UTMUTATO.txt-t?
 echo .
 cd %~dp0
