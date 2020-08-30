@@ -2,9 +2,7 @@
 
 # Előfeltételek
 #
-# Rendszergazdaként futtatott PowerShellből:
-#
-# Install-Module AzureAD
+Install-Module AzureAD -Scope CurrentUser
 #
 #
 # Használat
