@@ -4,17 +4,16 @@
 #
 # Előfeltételek
 #
-# 1) Rendszergazdaként futtatott PowerShellből:
-Install-Module MSOnline -Scope CurrentUser
+# 1) Az Office 365 A1 Plus for faculty és Office 365 A1 Plus for students licencek látsszanak a környezetben. 
 #
-# 2) Az Office 365 A1 Plus for faculty és Office 365 A1 Plus for students licencek látsszanak a környezetben. 
-#
-# 3) A tanárok Office 365 A1 for faculty, a diákok Office 365 A1 for students licenceket használjanak jelenleg. 
+# 2) A tanárok Office 365 A1 for faculty, a diákok Office 365 A1 for students licenceket használjanak jelenleg. 
 #
 # Használat
 #
 # A scriptet powershellből le kell futtatni. Nem kérdez, cselekszik.
 #
+# telepítés
+Install-Module MSOnline -Scope CurrentUser
 
 # bejelentkezés
 $cred = Get-Credential
