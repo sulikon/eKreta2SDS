@@ -5,7 +5,7 @@
 # Előfeltételek
 #
 # 1) Rendszergazdaként futtatott PowerShellből:
-# Install-Module MSOnline
+Install-Module MSOnline -Scope CurrentUser
 #
 # 2) Az Office 365 A1 Plus for faculty és Office 365 A1 Plus for students licencek látsszanak a környezetben. 
 #
@@ -48,4 +48,5 @@ else {
     Write-Host "Érintett tanárok száma: $($tanarok.Count)"
     $tanarok | Set-MsolUserLicense –AddLicenses $UjTanarLicenc –RemoveLicenses $RegiTanarLicenc
 }
+Read-Host "Enter leütésére kilép"
 # örülünk.
