@@ -34,7 +34,7 @@ rem $true értéknél fordított nevezéktan
 set param9=-FlipFirstnameLastname:$false
 
 rem Windows Credential Manager-ben létrehozott Credential neve, ha nincs megadva, akkor minden furásnál be kell jelentkezni
-rem set param10=-AzureADCredential "eKreta2SDS-"
+set param10=-AzureADCredential "eKreta2SDS-scarbss"
 
 rem AzureAD-ban regisztrált alkalmazás azonosítója GRAPH API-hoz. Ha nincs megadva, akkor nem lesz Graph Api használva.
 rem set param11=-AppId "123456"
@@ -46,4 +46,4 @@ echo Ugye nem felejtetted el tanulmanyozni az UTMUTATO.txt-t?
 echo .
 cd %~dp0
 powershell -executionpolicy bypass ".\bin\eKretaLaunch.ps1" %param1% %param2% %param3% %param4% %param5% %param6% %param7% %param8% %param9%
-pause Ellenorizd a kimenetet, masold ki a hibakat, ha voltak! Aztan nyomj meg egy gombot. Reszletes naplok a log mappaban vannak.
+pause Ellenorizd a kimenetet, masold ki a hibakat, ha voltak! Aztan nyomj meg egy gombot. Reszletes naplok a TraceLog mappaban vannak.
