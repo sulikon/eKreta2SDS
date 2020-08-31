@@ -26,7 +26,7 @@ Param (
     [Parameter()][string]$StudentYear = "201920", # mandatory on production
     [Parameter()][string]$OutputPath = ".\output", # Tracelog bevezetésével megszűnik
     [Parameter()][string]$LogPath = ".\log" , # Tracelog bevezetésével megszűnik
-    [Parameter()][string]$SDSFolder = "",
+    [Parameter()][string]$SDSFolder = ".\output",
     [Parameter()][string]$DomainName = "", # If domain name exists, it means On Prem AD + AD connect usage!
     [Parameter()][String]$TenantID = "", #for AzureAD connect, the tenantid is the ONMicrosoft domain nam of tenant.
     [Parameter()][String]$LogLevel = "Debug",
@@ -81,6 +81,9 @@ catch {
 # if ($LogPath -eq ".\log") {
 #     $LogPath = Join-Path (Get-Location) "log"
 # }
+if ($SDSFolder -eq ".\Output") {
+    $LogPath = Join-Path (Get-Location) "Output"
+}
 
 
 # TraceLog mappa előkészítése 
@@ -428,16 +431,19 @@ try {
     if (![string]::IsNullOrEmpty($SDSFolder) ) {
         # Test-Path doesn't accept empty string!
         if (test-path $SDSFolder) {  
-            Start-slepp -seconds 5
+            Start-sleep -seconds 5
             copy-item "$outputpath\school.csv"  $SDSFolder
             copy-item "$outputpath\teacher.csv"  $SDSFolder
             copy-item "$outputpath\student.csv"  $SDSFolder
             copy-item "$outputpath\section.csv"  $SDSFolder
             copy-item "$outputpath\TeacherRoster.csv"  $SDSFolder
             copy-item "$outputpath\StudentEnrollment.csv"  $SDSFolder
-            copy-item "$outputpath\user.csv"  $SDSFolder
-            copy-item "$outputpath\GuardianRelationShip.csv"  $SDSFolder
-
+            if (test-path "$outputpath\user.csv") { 
+                copy-item "$outputpath\user.csv"  $SDSFolder
+            }
+            if (test-path "$outputpath\GuardianRelationShip.csv") { 
+                copy-item "$outputpath\GuardianRelationShip.csv"  $SDSFolder
+            }
             Write-PSFMessage "Converted data copied to target"
         } 
     }
