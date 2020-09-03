@@ -18,6 +18,8 @@ Előfeltételek:
 Telepítés:
 
 1) Futtassuk le a eKinstall.cmd -t, nem kell rendszergazdaként.
+   Ha a Defender kék ablakkal megfogja ("A Windows megvédte a számítógépét" üzenettel), a "További információ"-ra
+   kattintva tudjuk mégis futtatni. 
    Minden felmerülő kérdésre pozitív választ adjunk: "Y", vagy ahol lehet, ott inkább "A". Jó sokszor kell.
    Ha elrontottuk, gond nélkül többször elindítható.
    Ez telepíti a szükséges PowerShell modulokat a számítógépre.
