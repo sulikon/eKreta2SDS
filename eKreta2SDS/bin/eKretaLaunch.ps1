@@ -47,6 +47,7 @@ if ($loglevel -match "TRANSCRIPT") {
     Start-transcript "$LogPath\eKreta2SDS-Transcript-$LogDate.Log"
 }
 
+$webversionuri = "https://sulimc.azurewebsites.net/ekreta2sds-version.txt" # for online version check
 $OutputCSVDelimiter = ","
 # $InputCSVDelimiter = ";" # Not used in code
 
@@ -72,6 +73,7 @@ catch {
 # $version = "20200417.1"
 # Külön fájlba kivezetve csak master branch-be mergeléskor állítjuk
 . .\bin\eKretaVersion.ps1
+
 
 # Tracelog bevezetésével megszűnik 
 
@@ -135,6 +137,15 @@ $LogPath = Join-Path $TraceLogFolder "Logs"
 
 Set-PSFLoggingProvider -Name 'LogFile' -FilePath "$LogPath\eKretaLaunch-$LogDate.Log" -Enabled $true
 Write-PSFMessage -level Host -Message "eKretaLaunch Script started. Version:$Version. Logpath: $LogPath"
+
+# online version check
+$webversion=(Invoke-WebRequest -Uri $webversionuri -ErrorAction Continue).Content
+if ($webversion -gt $Version) {
+    Write-PSFMessage -level Warning "Verzió-ellenőrzés: Kérem, töltse le és használja a legújabb verziót ($webversion)! https://github.com/sulikon/eKreta2SDS"
+}
+else {
+    Write-PSFMessage -level Host -Message "Verzió-ellenőrzés: OK"
+}
 
 if ($DomainName) {
     Write-PSFMessage -level Host -Message "Running mode: Local AD + Azure Active Directory"
