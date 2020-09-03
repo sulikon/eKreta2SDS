@@ -11,5 +11,5 @@ Install-Module CredentialManager -scope CurrentUser
 #Add-WindowsCapability -Online -Name Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
 }
 else {
-    Write-Host "Telep√≠t√©si hiba: 32 bites Windows nem t√°mogatott" -ForegroundColor Red
+    Write-Host "TelepÌ≠tÈsi hiba: 32 bites Windows nem t·mogatott" -ForegroundColor Red
 }
