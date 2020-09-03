@@ -1,4 +1,5 @@
-﻿
+Ez a szoftver a 2020/21-es évre van felkészítve.
+
 Előfeltételek:
 
 1) Office 365 oktatási változat környezet, megfelelő mennyiségű tanári és diáklicenccel (akár a fél éves lejáró próbalicenc is jó)
