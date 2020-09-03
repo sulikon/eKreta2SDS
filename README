@@ -1,16 +1,4 @@
-EZ A SZOFTVER MÉG NINCS FELKÉSZÍTVE A 2020/21-ES ÉV KEZELÉSÉRE ILLETVE ÉVVÁLTÁSRA. A KAPCSOLÓDÓ HIBÁK JAVÍTÁSA FOLYAMATBAN VAN, KÉRJÜK, MÉG NE HASZNÁLJA, KOMOLY GONDOT OKOZHAT.
-A FEJLEMÉNYEKRŐL A SULIKON FACEBOOK OLDALÁN (https://www.facebook.com/sulikoninfo) ÉS TWITTER CSATORNÁJÁN (https://twitter.com/sulikoninfo) KÜLDÜNK ÉRTESÍTÉST.
-
-Az Office 365 oktatási változat segítségével digitális oktatási alapplatform hozható létre egy iskolában, 
-amely távoktatásban is jól hasznosítható.
-Az eKreta2SDS segítségével egy üres iskolai Office 365 környezetben létre lehet hozni az összes tanárt, diákot, tanulócsoportokat 
-az intézmény eKréta rendszerének adatai alapján.
-A mozaNapló-t használó intézmények a doc\mozaNapló konvertálás.pdf alapján hozhatják adataikat eKréta formátumra.
-A tanulócsoportok tulajdonosai az ott tanító tanárok, tagjai a diákok lesznek.
-Egy intézményt lefedő teljes kialakítás akár egy óra alatt is kivitelezhető - akkor is, ha az intézménynek nincs is még Office 365 hozzáférése.
-
-Olyan iskoláknak, akiknek még nincs Office 365 vagy inkább újat csinálnának: https://youtu.be/8Y4LJiq3IYE (5. perctől 30. percig)
-Akiknek már vannak korábban felvett felhasználók, csoportok, és kiterjesztenék a teljes iskolára: https://aka.ms/tavtanulaswebinar3
+Ez a szoftver a 2020/21-es évre van felkészítve.
 
 Előfeltételek:
 
@@ -37,6 +25,26 @@ Telepítés:
 3) Notepad-del szerkesszük az eKreta2SDS.cmd -t. Adjuk meg a kért adatokat. 
    Ügyeljünk arra, hogy ne használjunk ékezetet, ahol ez a kérés.
 
+Előkészület:
+
+1) Ha az Office 365-ben vannak olyan korábban felvitt felhasználók, akiket nem eKreta2SDS-sel, 
+   hanem kézzel vagy .CSV importtal vettünk fel és akik szerepelnek az eKrétában idén, akkor
+   egy plusz lépést meg kell tegyünk.
+   Ahhoz, hogy az eKreta2SDS ne hozzon létre még egy felhasználót a részükre, ezeket a 
+   korábban felvitt felhasználókat meg kell jelölni ("megfesteni").
+   Ezt az eljárást az alábbi video szerint kell végrehajtani, csak azokra a tanárokra és diákokra,
+   akik az idei évre szóló Tanulok_tantargyai_es_pedagogusai.xlsx-ben szerepelnek és
+   a felhasználójukat nem a School Data Sync hozta létre:
+   https://www.youtube.com/watch?v=6otE0aFH9F0&feature=youtu.be&t=928
+2) Ha a korábban felvitt felhasználók felhasználóneveit más szabályok szerint vittük fel, 
+   mint amit az eKreta2SDS hozna létre és nem szeretnénk megváltoztatni a már létező 
+   felhasználóneveket, akkor az input\override.csv-be be kell írni, hogy azokat használja:   
+   https://youtu.be/6otE0aFH9F0?t=2564
+3) Az alapértelmezett működés szerint felcserélésre kerül a vezeték- és keresztnév, hogy 
+   a magyar szokásoknak megfelelőbb legyen a névkezelés.
+   Ez kikapcsolható az eKreta2SDS.cmd-ben a param9-et beállító sor módosításával, mentésével. 
+   set param9=-FlipFirstnameLastname:$false
+
 Futtatás:
 
 1) Futtassuk le az eKreta2SDS.cmd -t, nem kell rendszergazdaként. 
@@ -49,7 +57,8 @@ Futtatás:
 3) Az elkészült file-okat ellenőrizzük az Output mappában. Nyissuk meg őket egyenként Notepad-del és "Mentés másként..." alatt nézzük meg, 
    hogy a filetípus "UTF8" vagy "UTF-8 és BOM" legyen. Más nem jó. Állítsuk át UTF-8-ra a kódolást és írjuk felül az eredetit, 
    ha nem az volt a típusa a file-oknak.
-4) Finomhangoljuk a beállítást vagy akár módosítsuk a scriptet, amíg a várt eredmény előáll.
+   Alaposan ellenőrizzünk minden file-t: megvan-e a megfelelő mennyiségű tanár és diák?
+4) Finomhangoljuk a beállítást vagy akár módosítsuk a scriptet, amíg a várt eredmény előáll. 
 5) Nyissuk meg a https://sds.microsoft.com oldalt, jelentkezzünk be az Office 365 rendszergazdával és hozzuk létre és 
    futtassuk le a School Data Sync profile-t a "doc\Nulláról Teamsig.pdf" dokumentum útmutatása alapján. 
    Ez hozza létre a felhasználókat, csoportokat és népesíti be őket.
