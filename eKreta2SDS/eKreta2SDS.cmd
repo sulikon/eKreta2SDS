@@ -18,23 +18,19 @@ rem Felhasználók kezdõ jelszavának eleje Legyen legalább 4 betû, kisbetût, nagyb
 rem A kezdõ jelszóba az itt megadott prefix után a felhasználó saját oktatási azonosítójának utolsó 4 számjegye kerül.
 set param7=-PasswordPrefix 'KL.Bp' 
 
-rem --- Ez alatt a vonal alatt nem kell módosítani a 2019/20 tanévben ---
-echo EZ A SZOFTVER MÉG NINCS FELKÉSZÍTVE A 2020/21-ES ÉV KEZELÉSÉRE ILLETVE ÉVVÁLTÁSRA. 
-echo A KAPCSOLÓDÓ HIBÁK JAVÍTÁSA FOLYAMATBAN VAN, KÉRJÜK, MÉG NE HASZNÁLJA, KOMOLY GONDOT OKOZHAT.
-echo A FEJLEMÉNYEKRÕL A SULIKON FACEBOOK OLDALÁN (https://www.facebook.com/sulikoninfo) 
-echo ÉS TWITTER CSATORNÁJÁN (https://twitter.com/sulikoninfo) KÜLDÜNK ÉRTESÍTÉST.
+rem --- Ez alatt a vonal alatt nem szükséges módosítani a 2020/21 tanévben ---
 
 rem Tanév, most nem kell szerkeszteni
-set param6=-StudentYear 201920
+set param6=-StudentYear 202021
 rem Naplózás szintje, most nem kell szerkeszteni
 set param8=-LogLevel "Debug"
 
 rem Vezetéknév és keresztnév fordított kezelése (Csak akkor használjuk, ha magyar nevezéktan szerint kell képezni a Displayname értéket)
 rem $true értéknél fordított nevezéktan
-set param9=-FlipFirstnameLastname:$false
+set param9=-FlipFirstnameLastname:$true
 
 rem Windows Credential Manager-ben létrehozott Credential neve, ha nincs megadva, akkor minden furásnál be kell jelentkezni
-set param10=-AzureADCredential "eKreta2SDS-scarbss"
+rem set param10=-AzureADCredential "eKreta2SDS-"
 
 rem AzureAD-ban regisztrált alkalmazás azonosítója GRAPH API-hoz. Ha nincs megadva, akkor nem lesz Graph Api használva.
 rem set param11=-AppId "123456"
