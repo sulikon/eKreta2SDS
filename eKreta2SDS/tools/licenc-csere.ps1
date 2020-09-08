@@ -12,12 +12,15 @@
 #
 # A scriptet powershellből le kell futtatni. Nem kérdez, cselekszik.
 #
+If ( [Environment]::Is64BitProcess ) {
+
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 # telepítés
 Install-Module MSOnline -Scope CurrentUser
 
 # bejelentkezés
-$cred = Get-Credential
-Connect-MsolService -Credential $cred
+$null = Connect-MsolService -ErrorAction Stop
 
 # licencek lekérdezése
 [array]$licencek = Get-MsolAccountSku
@@ -36,16 +39,42 @@ if ([string]::IsNullOrWhiteSpace($RegiDiakLicenc) -or [string]::IsNullOrWhiteSpa
 else {
     # cseréljük a licenceket
     Write-Host "Licencek cseréje"
-    # lekérdezünk minden felhasználót
+    # lekérdezünk minden felhasználót 
     [array]$users = Get-MsolUser -All 
+
     # lecseréljük a diáklicenceket
-    [array]$diakok = $users | Where-Object {($_.isLicensed -eq $true) -and ($_.Licenses.AccountSKUID -eq $RegiDiakLicenc)} 
-    Write-Host "Érintett diákok száma: $($diakok.Count)"
-    $diakok | Set-MsolUserLicense –AddLicenses $UjDiakLicenc –RemoveLicenses $RegiDiakLicenc 
+    [array]$diakokcs = $users | Where-Object {($_.isLicensed -eq $true) -and ($_.Licenses.AccountSKUID -eq $RegiDiakLicenc) -and !($_.Licenses.AccountSKUID -contains $UjDiakLicenc)} 
+    Write-Host "A1 licencű diákok száma: $($diakokcs.Count)" -ForegroundColor Green
+    if ($diakokcs.Count -gt 0) {
+        write-host "Cserélünk A1 Plus-ra" -ForegroundColor Green
+        $diakokcs | % { $_.UserPrincipalName;Set-MsolUserLicense -ObjectId $_.objectid –AddLicenses $UjDiakLicenc –RemoveLicenses $RegiDiakLicenc}
+    }
+    # töröljük a régi diáklicenceket
+    [array]$diakokt = $users | Where-Object {($_.isLicensed -eq $true) -and ($_.Licenses.AccountSKUID -eq $RegiDiakLicenc) -and ($_.Licenses.AccountSKUID -eq $UjDiakLicenc)} 
+    Write-Host "A1 és A1 Plus licencű diákok száma: $($diakokt.Count)" -ForegroundColor Green
+    if ($diakokt.Count -gt 0) {
+        write-host "Az A1-et töröljük róluk, marad az A1 Plus" -ForegroundColor Green
+        $diakokt | % { $_.UserPrincipalName;Set-MsolUserLicense -ObjectId $_.objectid –RemoveLicenses $RegiDiakLicenc}
+    }
     # lecseréljük a tanári licenceket
-    [array]$tanarok = $users | Where-Object {($_.isLicensed -eq $true) -and ($_.Licenses.AccountSKUID -eq $RegiTanarLicenc)}
-    Write-Host "Érintett tanárok száma: $($tanarok.Count)"
-    $tanarok | Set-MsolUserLicense –AddLicenses $UjTanarLicenc –RemoveLicenses $RegiTanarLicenc
+    [array]$tanarokcs = $users | Where-Object {($_.isLicensed -eq $true) -and ($_.Licenses.AccountSKUID -eq $RegiTanarLicenc) -and !($_.Licenses.AccountSKUID -contains $UjTanarLicenc)} 
+    Write-Host "A1 licencű tanárok száma: $($tanarokcs.Count)" -ForegroundColor Green
+    if ($tanarokcs.Count -gt 0) {
+        write-host "Cserélünk A1 Plus-ra" -ForegroundColor Green
+        $tanarokcs | % { $_.UserPrincipalName;Set-MsolUserLicense -ObjectId $_.objectid –AddLicenses $UjTanarLicenc –RemoveLicenses $RegiTanarLicenc}
+    }
+    # töröljük a régi tanári licenceket
+    [array]$tanarokt = $users | Where-Object {($_.isLicensed -eq $true) -and ($_.Licenses.AccountSKUID -eq $RegiTanarLicenc) -and ($_.Licenses.AccountSKUID -eq $UjTanarLicenc)} 
+    Write-Host "A1 és A1 Plus licencű tanárok száma: $($tanarokt.Count)" -ForegroundColor Green
+    if ($tanarokt.Count -gt 0) {
+        write-host "Az A1-et töröljük róluk, marad az A1 Plus" -ForegroundColor Green
+        $tanarokt | % { $_.UserPrincipalName;Set-MsolUserLicense -ObjectId $_.objectid –RemoveLicenses $RegiTanarLicenc}
+    }
 }
 Read-Host "Enter leütésére kilép"
 # örülünk.
+}
+else {
+    Write-Host "Hiba: a futtatás 32 bites Windowson vagy 32 bites programból indítva nem támogatott" -ForegroundColor Red
+    Read-Host "Enterre kilép."
+}

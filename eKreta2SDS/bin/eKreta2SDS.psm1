@@ -205,10 +205,15 @@ function InitAzureAD {
             if ($_.MailNickName.Length -ge 8) {
                 if ($_.MailNickName.Substring(0, 8) -eq "Section_") {
                     #Only for Section groups!
-                    $SectionID = [int] $_.MailNickName.Substring(8)
-                    $global:sections[$_.Displayname] = $SectionID
-                    if ($Global:sid -le $SectionID) {
-                        $Global:sid = $SectionID
+                    $SectionID = 0
+                    if ([int]::TryParse($_.MailNickName.Substring(8),[ref]$SectionID)) { # Ha egésszé konvertálható a Section_ utáni rész
+                        $global:sections[$_.Displayname] = $SectionID                    # akkor állítsuk a legnagyobb használt sid-et
+                        if ($Global:sid -le $SectionID) {
+                            $Global:sid = $SectionID
+                        }
+                    } 
+                    else {
+                        Write-PSFMessage -tag Report "Skipping non-numeric section $($_.MailNickName)"
                     }
                 }
             }
