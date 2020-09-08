@@ -191,7 +191,13 @@ function InitADUsers {
         
     }
     catch {
-        Write-PSFMessage -level Host "Unable to Connect or retrieve users from AzureAD!" -ErrorRecord $_
+        $errorrec = $_
+        if ($errorrec.Exception -match "multi-factor") {
+            Write-PSFMessage -level Important "Többfaktoros hitelesítést vár el a rendszer. Kövesse ezt a cikket: https://sulikon.freshdesk.com/a/solutions/articles/62000207032"
+        }
+        else {
+            Write-PSFMessage -level Host "Unable to Connect or retrieve users from AzureAD!" -ErrorRecord $errorrec
+        }
         exit
     }
 }

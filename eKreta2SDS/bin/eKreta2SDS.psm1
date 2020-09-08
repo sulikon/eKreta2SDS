@@ -342,7 +342,7 @@ function Get-UniqueUsername {
             # Generate newusername 
             # New username : username  + InputSID last 2 character + @UPN Suffix
             $newusername = $inputusername.split("@")[0] + $InputSID.Substring($InputSID.length - 2) + "@" + $inputusername.split("@")[1]
-            Write-PSFMessage  "New username generated to resolve conflict: $InputUserName -> $newusername SID: $InputSID!" -tag "Report"
+            Write-PSFMessage -Level Host "New username generated to resolve conflict: $InputUserName -> $newusername SID: $InputSID" -tag "Report"
             
             if (($global:usernames[$newusername] -eq $InputSID) -or ($global:azureadusers[$newusername] -eq $InputSID)) {
                 #newUser already exist in new username table or AzureADtable with the same SID!
@@ -833,7 +833,7 @@ Function eKreta2Convert() {
 
         #Import Excel1
         try {
-            Write-PSFMessage -Level Host "Tanulók excel import elkezdődött"
+            Write-PSFMessage -Level Host "Excel import elkezdődött"
             [array]$Excel1 = Import-XLSX $Input_tanulok | Where-Object { ![string]::IsNullOrWhiteSpace($_.Vezetéknév) -and ![string]::IsNullOrWhiteSpace($_.Utónév) -and ![string]::IsNullOrWhiteSpace($_.'Oktatási azonosító') }
             if (!$Excel1) {
                 throw 
