@@ -6,6 +6,7 @@
 #TeacherName2ID;012345;Imre Ferenc;2019201002
 #TeacherName2UserName;012345;Pákozdi Anna;pakozdia@probavarsuli.hu
 #TeacherID2UserName;012345;2019101004;KissL@probavarsuli.hu
+#StudentID2UserName;012345;7555865288;NagyP@probavarsuli.hu
 #TeacherID2ID;012345;201920KA2;2019202
 #StudentID2FirstName;012345;7555867854;"Béla"
 #StudentID2LastName;012345;7555867854;"Kovács"
@@ -14,5 +15,6 @@ TeacherName2ID;012345;Haász Károlyné;2019201001
 TeacherName2ID;012345;Imre Ferenc;2019201002
 TeacherName2UserName;012345;Pákozdi Anna;pakozdia@probavarsuli.hu
 TeacherID2UserName;012345;2019101004;KissL@probavarsuli.hu
+StudentID2UserName;012345;7555865288;NagyP@probavarsuli.hu
 StudentID2FirstName;012345;7555867854;"Béla"
 StudentID2LastName;012345;7555867854;"Kovács"
