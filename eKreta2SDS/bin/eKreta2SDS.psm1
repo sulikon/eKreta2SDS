@@ -205,10 +205,15 @@ function InitAzureAD {
             if ($_.MailNickName.Length -ge 8) {
                 if ($_.MailNickName.Substring(0, 8) -eq "Section_") {
                     #Only for Section groups!
-                    $SectionID = [int] $_.MailNickName.Substring(8)
-                    $global:sections[$_.Displayname] = $SectionID
-                    if ($Global:sid -le $SectionID) {
-                        $Global:sid = $SectionID
+                    $SectionID = 0
+                    if ([int]::TryParse($_.MailNickName.Substring(8),[ref]$SectionID)) { # Ha egésszé konvertálható a Section_ utáni rész
+                        $global:sections[$_.Displayname] = $SectionID                    # akkor állítsuk a legnagyobb használt sid-et
+                        if ($Global:sid -le $SectionID) {
+                            $Global:sid = $SectionID
+                        }
+                    } 
+                    else {
+                        Write-PSFMessage -tag Report "Skipping non-numeric section $($_.MailNickName)"
                     }
                 }
             }
@@ -337,7 +342,7 @@ function Get-UniqueUsername {
             # Generate newusername 
             # New username : username  + InputSID last 2 character + @UPN Suffix
             $newusername = $inputusername.split("@")[0] + $InputSID.Substring($InputSID.length - 2) + "@" + $inputusername.split("@")[1]
-            Write-PSFMessage  "New username generated to resolve conflict: $InputUserName -> $newusername SID: $InputSID!" -tag "Report"
+            Write-PSFMessage -Level Host "New username generated to resolve conflict: $InputUserName -> $newusername SID: $InputSID" -tag "Report"
             
             if (($global:usernames[$newusername] -eq $InputSID) -or ($global:azureadusers[$newusername] -eq $InputSID)) {
                 #newUser already exist in new username table or AzureADtable with the same SID!
@@ -828,7 +833,7 @@ Function eKreta2Convert() {
 
         #Import Excel1
         try {
-            Write-PSFMessage -Level Host "Tanulók excel import elkezdődött"
+            Write-PSFMessage -Level Host "Excel import elkezdődött"
             [array]$Excel1 = Import-XLSX $Input_tanulok | Where-Object { ![string]::IsNullOrWhiteSpace($_.Vezetéknév) -and ![string]::IsNullOrWhiteSpace($_.Utónév) -and ![string]::IsNullOrWhiteSpace($_.'Oktatási azonosító') }
             if (!$Excel1) {
                 throw 

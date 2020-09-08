@@ -3,6 +3,8 @@ Param (
     [Parameter()][String]$StoredCredential = "" # Stored credential name in Windows Credential Manager
 )
 
+If ( [Environment]::Is64BitProcess ) {
+
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 install-module msonline -scope CurrentUser
 
@@ -85,6 +87,15 @@ foreach ($domain in $domainek) {
         }
     }
 } 
+
+# felhasználók lekérdezése
+    [array]$users = Get-MsolUser -All 
+
+    [array]$diakokcs = $users | Where-Object {($_.isLicensed -eq $true) -and ($_.Licenses.AccountSKUID -eq $RegiDiakLicenc) -and !($_.Licenses.AccountSKUID -contains $UjDiakLicenc)} 
+    [array]$diakokt = $users | Where-Object {($_.isLicensed -eq $true) -and ($_.Licenses.AccountSKUID -eq $RegiDiakLicenc) -and ($_.Licenses.AccountSKUID -eq $UjDiakLicenc)} 
+    [array]$tanarokcs = $users | Where-Object {($_.isLicensed -eq $true) -and ($_.Licenses.AccountSKUID -eq $RegiTanarLicenc) -and !($_.Licenses.AccountSKUID -contains $UjTanarLicenc)} 
+    [array]$tanarokt = $users | Where-Object {($_.isLicensed -eq $true) -and ($_.Licenses.AccountSKUID -eq $RegiTanarLicenc) -and ($_.Licenses.AccountSKUID -eq $UjTanarLicenc)} 
+
 
 # előfizetések lekérdezése
 [array]$elofizetesek = Get-MsolSubscription
@@ -175,7 +186,13 @@ if ((($A1TanarVeglegesCount -eq 0) -and ($RegiTanarLicencCount -gt 0)) -or (($A1
 }
 else {
     if (($A1TanarVeglegesCount -gt 0) -and ($A1DiakVeglegesCount -gt 0)) {
-        Write-Host "Lejáró, próbaverziós Office 365 A1 diák és tanár licencek használaton kívül: OK (végleges A1 licenceket használnak)" -ForegroundColor Green
+        Write-Host "Lejáró, próbaverziós Office 365 A1 diák és tanár licencek használaton kívül: OK (végleges A1 licencek vannak)" -ForegroundColor Green
+        If ($diakokcs.Count + $tanarokcs.Count -gt 0) {
+            Write-Host "Információ: a telepítős Office-hoz is hozzájut minden felhasználó, ha lecseréli az A1 licenceket végleges A1 Plus licencekre a https://sulikon.freshdesk.com/a/solutions/articles/62000150184 cikk lépéseit követve."
+            Write-Host "Részletek:"
+            Write-Host "Végleges Office 365 A1 for Faculty licencek használatban: ",$tanarokcs.Count
+            Write-Host "Végleges Office 365 A1 for Students licencek használatban: ",$diakokcs.Count
+        }
     }
     else {
         Write-Host "Lejáró, próbaverziós Office 365 A1 diák és tanár licencek használaton kívül: OK" -ForegroundColor Green
@@ -184,3 +201,8 @@ else {
 
 
 Read-Host -Prompt "Üssön ENTER-t a kilépéshez!"
+}
+else {
+    Write-Host "Hiba: a futtatás 32 bites Windowson vagy 32 bites programból indítva nem támogatott" -ForegroundColor Red
+    Read-Host "Enterre kilép."
+}

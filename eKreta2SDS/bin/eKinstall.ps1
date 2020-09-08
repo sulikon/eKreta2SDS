@@ -11,5 +11,6 @@ Install-Module CredentialManager -scope CurrentUser
 #Add-WindowsCapability -Online -Name Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
 }
 else {
-    Write-Host "Telepí­tési hiba: 32 bites Windows nem támogatott" -ForegroundColor Red
+    Write-Host "Telepítési hiba: a futtatás 32 bites Windowson vagy 32 bites programból indítva nem támogatott" -ForegroundColor Red
+    Read-Host "Enterre kilép:"
 }
