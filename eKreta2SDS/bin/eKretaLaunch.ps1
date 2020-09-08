@@ -53,7 +53,7 @@ $OutputCSVDelimiter = ","
 
 # Check prereq
 If ( ![Environment]::Is64BitProcess ) {
-    Write-Host "Hiba: a futtatás 32 bites Windowson nem támogatott" -ForegroundColor Red
+    Write-Host "Hiba: a futtatás 32 bites Windowson vagy 32 bites programból indítva nem támogatott" -ForegroundColor Red
     exit
 }
 
