@@ -34,11 +34,12 @@ $UjTanarLicenc = ($licencek | Where-Object { $_.AccountSkuId -match "STANDARDWOF
 # Ellenőrizzük, sikeres volt-e a lekérdezés
 if ([string]::IsNullOrWhiteSpace($RegiDiakLicenc) -or [string]::IsNullOrWhiteSpace($UjDiakLicenc) -or [string]::IsNullOrWhiteSpace($RegiTanarLicenc) -or [string]::IsNullOrWhiteSpace($UjTanarLicenc)) {
     # megállunk hibával
-    throw Write-Host "Nem sikerült azonosítani a licenceket!"
+    throw Write-Host "Nem sikerült azonosítani a licenceket! Biztos, hogy már legenerálta az A1 Plus tanári és diáklicenceket? https://sulikon.freshdesk.com/a/solutions/articles/62000080221"
 }
 else {
     # cseréljük a licenceket
     Write-Host "Licencek cseréje"
+    Write-Host "Figyelem, ha közben elfogynak a szabad licencek, újra kell futtatni a licencgenerálást az adott fajtára: https://sulikon.freshdesk.com/a/solutions/articles/62000080221 " 
     # lekérdezünk minden felhasználót 
     [array]$users = Get-MsolUser -All 
 
