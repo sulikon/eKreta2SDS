@@ -40,7 +40,8 @@ Param (
     [Parameter()][String]$AzureADCredential = "", # Stored credential name in Windows Credential Manager
     [Parameter()][switch]$CheckADUsers = $false, # If is $true and Local AD mode is active, then always check the Local AD users
     [Parameter()][String]$AppId = "",  # AzureAD-ban regisztrált alkalmazás azonosítója - GRAPH API-hoz
-    [Parameter()][String]$AppSecret = ""  # APP Kulcs GRAPH API-hoz 
+    [Parameter()][String]$AppSecret = "",  # APP Kulcs GRAPH API-hoz 
+    [Parameter()][String]$SchoolSectionPrefix = "" # Előtag a tanulócsoportok nevéhez, elsősorban többiskolás környezetekhez.
 )
 
 if ($loglevel -match "TRANSCRIPT") {
@@ -312,7 +313,7 @@ function CheckAzureADUser {
 }
 
 function CallConvert {
-    return  eKreta2Convert "$SchoolID" "$SchoolName" "$SchoolAddress" "$Input_tanulok" -UPNSuffix "$UPNSuffix" -tenantID "$tenantID" -PasswordPrefix $PasswordPrefix -AzureCredential $AzureCredential -DomainName $DomainName -StudentYear $StudentYear -outputPath $outputpath -LogPath $logpath -FlipFirstnameLastname:$FlipFirstnameLastname -CheckADUsers:$CheckADUsers -appId $AppId -appSecret $AppSecret
+    return  eKreta2Convert "$SchoolID" "$SchoolName" "$SchoolAddress" "$Input_tanulok" -UPNSuffix "$UPNSuffix" -tenantID "$tenantID" -PasswordPrefix $PasswordPrefix -AzureCredential $AzureCredential -DomainName $DomainName -StudentYear $StudentYear -outputPath $outputpath -LogPath $logpath -FlipFirstnameLastname:$FlipFirstnameLastname -CheckADUsers:$CheckADUsers -appId $AppId -appSecret $AppSecret -SchoolSectionPrefix $SchoolSectionPrefix
     #reset the  LOG destination to the launcher!
     Set-PSFLoggingProvider -Name 'LogFile' -FilePath "$LogPath\eKretaLaunch-$LogDate.Log" -Enabled $true
 }

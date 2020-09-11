@@ -29,17 +29,22 @@ rem Vezetéknév és keresztnév fordított kezelése (Csak akkor használjuk, ha magya
 rem $true értéknél fordított nevezéktan
 set param9=-FlipFirstnameLastname:$true
 
+rem Többiskolás környezetekben célszerû lehet az egyes iskolák csoportjainak megkülönböztetése.
+rem Itt adható meg az az elõtag, amivel minden csoport neve kezdõdik - ha meg van adva.
+rem set param10=-SchoolSectionPrefix "Próbavár"
+
+
 rem Windows Credential Manager-ben létrehozott Credential neve, ha nincs megadva, akkor minden furásnál be kell jelentkezni
-rem set param10=-AzureADCredential "eKreta2SDS-"
+rem set param11=-AzureADCredential "eKreta2SDS-"
 
 rem AzureAD-ban regisztrált alkalmazás azonosítója GRAPH API-hoz. Ha nincs megadva, akkor nem lesz Graph Api használva.
-rem set param11=-AppId "123456"
+rem set param12=-AppId "123456"
 
 rem APP Kulcs GRAPH API-hoz. Ha nincs megadva, akkor nem lesz Graph Api használva.
-rem set param12=-AppSecret "123456"
+rem set param13=-AppSecret "123456"
 
 echo Ugye nem felejtetted el tanulmanyozni az UTMUTATO.txt-t?
 echo .
 cd %~dp0
-powershell -executionpolicy bypass ".\bin\eKretaLaunch.ps1" %param1% %param2% %param3% %param4% %param5% %param6% %param7% %param8% %param9%
+powershell -executionpolicy bypass ".\bin\eKretaLaunch.ps1" %param1% %param2% %param3% %param4% %param5% %param6% %param7% %param8% %param9% %param10% %param11% %param12% %param13%
 pause Ellenorizd a kimenetet, masold ki a hibakat, ha voltak! Aztan nyomj meg egy gombot. Reszletes naplok a TraceLog mappaban vannak.
