@@ -19,7 +19,7 @@ Install-Module AzureAD -Scope CurrentUser
 $null = Connect-AzureAD -ErrorAction Stop
 
 Write-Host "AnchorId-k lekérdezése"
-Write-Host "A tanároké 'Teacher_#', a diákoké 'Student_#' alakú, ahol # az oktatási azonosítót jelöli.
+Write-Host "A tanároké 'Teacher_#', a diákoké 'Student_#' alakú, ahol # az oktatási azonosítót jelöli."
 
 $users = Get-AzureADUser -All $true
 $anchorinfo = @()
