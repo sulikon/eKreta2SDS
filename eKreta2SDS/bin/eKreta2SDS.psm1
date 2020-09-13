@@ -535,7 +535,7 @@ function Get-TeacherID {
         # Oktatási azonosítóval nem rendelkező, de nem külsős (nincs [] jelölés) tanárok kezelése
 		if ($TID.length -eq 0) {
 		
-			$TID = (Get-Date).ToString('yyyyMMddHHmmss')
+			$TID = "$($StudentYear)-" + ((New-Guid).ToString())
 			$fromArray = ($OverrideArray | Where-Object { $_.Type -eq "TeacherName2ID" -and $_.Key -eq $TName0})
 			
 			if (!$fromArray) {
