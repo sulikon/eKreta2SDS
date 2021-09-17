@@ -1,49 +1,50 @@
 @echo off
-rem --- KÃ©rem, mÃ³dosÃ­tsa a megadott pÃ©ldaadatokat az iskola adataira! ---
+rem --- Kérem, módosítsa a megadott példaadatokat az iskola adataira! ---
 
-rem Az iskola oktatÃ¡si azonosÃ­tÃ³ja:
+rem Az iskola oktatási azonosítója:
 set param1=-schoolid '012345' 
 
-rem Az iskola neve. Ã‰KEZETET NE hasznÃ¡ljon! Ez nem lÃ¡tszik a felhasznÃ¡lÃ³knak.
+rem Az iskola neve. ÉKEZETET NE használjon! Ez nem látszik a felhasználóknak.
 set param2=-SchoolName 'Probavari Altalanos Iskola' 
 
-rem Az iskola cÃ­me. Ã‰KEZETET NE hasznÃ¡ljon! Ez nem lÃ¡tszik a felhasznÃ¡lÃ³knak.
+rem Az iskola címe. ÉKEZETET NE használjon! Ez nem látszik a felhasználóknak.
 set param3=-SchoolAddress '4500 Probavar Kossuth u. 26.' 
 
-rem Az Office 365 kÃ¶rnyezet domain neve
+rem Az Office 365 környezet domain neve
 set param4=-UPNSuffix 'probavarsuli.hu'
 set param5=-tenantid probavarsuli.hu
 
-rem FelhasznÃ¡lÃ³k kezdÅ‘ jelszavÃ¡nak eleje Legyen legalÃ¡bb 4 betÅ±, kisbetÅ±t, nagybetÅ±t Ã©s egy jelet is tartalmazzon. 
-rem A kezdÅ‘ jelszÃ³ba az itt megadott prefix utÃ¡n a felhasznÃ¡lÃ³ sajÃ¡t oktatÃ¡si azonosÃ­tÃ³jÃ¡nak utolsÃ³ 4 szÃ¡mjegye kerÃ¼l.
+rem Felhasználók kezdõ jelszavának eleje Legyen legalább 4 betû, kisbetût, nagybetût és egy jelet is tartalmazzon. 
+rem A kezdõ jelszóba az itt megadott prefix után a felhasználó saját oktatási azonosítójának utolsó 4 számjegye kerül.
 set param7=-PasswordPrefix 'KL.Bp' 
 
-rem --- Ez alatt a vonal alatt nem szÃ¼ksÃ©ges mÃ³dosÃ­tani a 2020/21 tanÃ©vben ---
+rem --- Ez alatt a vonal alatt nem szükséges módosítani a 2020/21 tanévben ---
 
-rem TanÃ©v, most nem kell szerkeszteni
+rem Tanév, most nem kell szerkeszteni
 set param6=-StudentYear 202021
-rem NaplÃ³zÃ¡s szintje, most nem kell szerkeszteni
+rem Naplózás szintje, most nem kell szerkeszteni
 set param8=-LogLevel "Debug"
 
-rem VezetÃ©knÃ©v Ã©s keresztnÃ©v fordÃ­tott kezelÃ©se (Csak akkor hasznÃ¡ljuk, ha magyar nevezÃ©ktan szerint kell kÃ©pezni a Displayname Ã©rtÃ©ket)
-rem $true Ã©rtÃ©knÃ©l fordÃ­tott nevezÃ©ktan
+rem Vezetéknév és keresztnév fordított kezelése (Csak akkor használjuk, ha magyar nevezéktan szerint kell képezni a Displayname értéket)
+rem $true értéknél fordított nevezéktan
 set param9=-FlipFirstnameLastname:$true
 
-rem TÃ¶bbiskolÃ¡s kÃ¶rnyezetekben cÃ©lszerÅ± lehet az egyes iskolÃ¡k csoportjainak megkÃ¼lÃ¶nbÃ¶ztetÃ©se.
-rem Itt adhatÃ³ meg az az elÅ‘tag, amivel minden csoport neve kezdÅ‘dik - ha meg van adva.
-rem set param10=-SchoolSectionPrefix "PrÃ³bavÃ¡r"
+rem Többiskolás környezetekben célszerû lehet az egyes iskolák csoportjainak megkülönböztetése.
+rem Itt adható meg az az elõtag, amivel minden csoport neve kezdõdik - ha meg van adva.
+rem set param10=-SchoolSectionPrefix "Próbavár"
 
-rem TÃ¶bbiskolÃ¡s kÃ¶rnyezetekben cÃ©lszerÅ± lehet az egyes iskolÃ¡k csoportjainak megkÃ¼lÃ¶nbÃ¶ztetÃ©se.
-rem Itt adhatÃ³ meg az az utÃ³tag, amely minden csoport nevÃ©be bekerÃ¼l a tanÃ©v elÃ© - ha meg van adva.
-rem set param11=-SchoolSectionSuffix "PrÃ³bavÃ¡r"
+rem Többiskolás környezetekben célszerû lehet az egyes iskolák csoportjainak megkülönböztetése.
+rem Itt adható meg az az utótag, amivel minden csoport neve végzõdik a tanév jelzése elõtt - ha meg van adva.
+rem set param11=-SchoolSectionSuffix "Próbavár"
 
-rem Windows Credential Manager-ben lÃ©trehozott Credential neve, ha nincs megadva, akkor minden furÃ¡snÃ¡l be kell jelentkezni
+
+rem Windows Credential Manager-ben létrehozott Credential neve, ha nincs megadva, akkor minden furásnál be kell jelentkezni
 rem set param12=-AzureADCredential "eKreta2SDS-"
 
-rem AzureAD-ban regisztrÃ¡lt alkalmazÃ¡s azonosÃ­tÃ³ja GRAPH API-hoz. Ha nincs megadva, akkor nem lesz Graph Api hasznÃ¡lva.
+rem AzureAD-ban regisztrált alkalmazás azonosítója GRAPH API-hoz. Ha nincs megadva, akkor nem lesz Graph Api használva.
 rem set param13=-AppId "123456"
 
-rem APP Kulcs GRAPH API-hoz. Ha nincs megadva, akkor nem lesz Graph Api hasznÃ¡lva.
+rem APP Kulcs GRAPH API-hoz. Ha nincs megadva, akkor nem lesz Graph Api használva.
 rem set param14=-AppSecret "123456"
 
 echo Ugye nem felejtetted el tanulmanyozni az UTMUTATO.txt-t?
