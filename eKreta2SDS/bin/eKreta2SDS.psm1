@@ -316,7 +316,12 @@ function Get-SectionName {
         $sn = $SchoolSectionPrefix + $SectioNSeparator + $SectionName + $SectioNSeparator + $ClassName + $SectioNSeparator + $StudentYearSectionSuffix
     }
     else {
-        $sn = $SectionName + $SectioNSeparator + $ClassName + $SectioNSeparator + $StudentYearSectionSuffix
+    	if ($SchoolSectionSuffix -ne "") {
+        	$sn = $SectionName + $SectioNSeparator + $ClassName + $SectioNSeparator + $SchoolSectionSuffix + $SectioNSeparator + $StudentYearSectionSuffix
+    	}
+    	else {
+		$sn = $SectionName + $SectioNSeparator + $ClassName + $SectioNSeparator + $StudentYearSectionSuffix
+	}
     }
     #Remove comma from Section Name 
     $sn = $sn -replace ","
@@ -746,6 +751,7 @@ Function eKreta2Convert() {
         [Parameter()][String]$appId = "",  # AzureAD-ban regisztrált alkalmazás azonosítója GRAPH API-hoz
         [Parameter()][String]$appSecret = "",   # APP Kulcs GRAPH API-hoz   
         [Parameter()][String]$SchoolSectionPrefix = "" # Előtag a tanulócsoportok nevéhez, elsősorban többiskolás környezetekhez.
+        [Parameter()][String]$SchoolSectionSuffix = "" # Utótag a tanulócsoportok nevéhez, elsősorban többiskolás környezetekhez.
     )
     #  Versioning 
     # $version = "20200417.1"
